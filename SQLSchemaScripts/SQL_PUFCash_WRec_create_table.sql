@@ -1,0 +1,13 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS PUFCash_WRec ( 
+   id INTEGER PRIMARY KEY,
+   AnonChipNum INTEGER NOT NULL,
+   LLK BLOB NOT NULL UNIQUE, 
+   eCt BLOB NOT NULL,
+   heCt BLOB NOT NULL,
+   num_eCt INTEGER NOT NULL,
+   status INTEGER NOT NULL
+   );
+
+CREATE UNIQUE INDEX WRec_ID_index ON PUFCash_WRec (id);
