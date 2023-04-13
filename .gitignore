@@ -35,4 +35,5 @@
 *.db
 
 /Makefile
+/verifier_regeneration
 *.elf
