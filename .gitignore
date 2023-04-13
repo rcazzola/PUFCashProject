@@ -34,4 +34,4 @@
 #Database
 *.db
 
-*/Makefile
+/Makefile
