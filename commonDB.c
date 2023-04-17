@@ -1234,7 +1234,7 @@ but challenge mask selects this PO with %c\n", PUF_instance_index, vecpair_index
 // Read in the enrollment data from a Chip/placement file, e.g., C1_V1_KG_FU_... Modified 8/3/2019 to handle
 // TDC enrollment files.
 
-int ReadChipEnrollPNs(int max_string_len, char ChipEnrollDatafile[max_string_len], float **PNX_ptr, 
+int ReadChipEnrollPNs(int max_string_len, char *ChipEnrollDatafile, float **PNX_ptr, 
    float **PNX_Tsig_ptr, int **rise_fall_ptr, int **vec_pairs_ptr, int **POs_ptr, int *num_PNX_ptr, 
    int num_POs, int has_masks, int num_vec_pairs, char **master_masks, int debug_flag)
    {
