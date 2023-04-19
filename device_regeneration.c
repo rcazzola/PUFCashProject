@@ -1357,9 +1357,9 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 // Menu Account
 // Natasha
 
-   case MENU_ACCOUNT:
-      printf("trigger menu\n"); fflush(stdout); 
-      break;
+         case MENU_ACCOUNT:
+            printf("trigger menu\n"); fflush(stdout); 
+            break;
 // ======================================
 // ======================================
 // Alice pays Bob. 
