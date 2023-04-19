@@ -519,7 +519,7 @@ char response_str[max_string_len];
    return;
    }
 
-
+// Aisha
 // Alice Account
 // ========================================================================================================
 // ========================================================================================================
@@ -643,7 +643,12 @@ if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket
       { printf("ERROR: Failed to send data from FI to Alice\n"); }
 else { 
    printf("SUCCESS: Sent data from FI to Alice\n");
-   printf("Account Balance: %s\n", num_eCt_str);
+   int amount;
+   sscanf(num_eCt_str, "%d", &amount);
+   int cents = amount % 100;
+   int dollars = amount / 100;
+   printf("Account Balance: $%d.%02d\n", dollars, cents);
+   // printf("Account Balance: %s\n", num_eCt_str);
 }
 
 printf("AliceAccount(): DONE!\n"); fflush(stdout);
@@ -652,6 +657,7 @@ printf("AliceAccount(): DONE!\n"); fflush(stdout);
 
    return;
    }
+
 
 
 // ========================================================================================================
@@ -737,6 +743,14 @@ printf("\tProcessing command '%s'\tID %d\tITERATION %d\n", command_str, ThreadDa
          AliceWithdrawal(max_string_len, SHP_ptr, Device_socket_desc, &PUFCash_Account_DB_mutex, &ZeroTrust_AuthenToken_DB_mutex, SK_TF, 
             MIN_WITHDRAW_INCREMENT, Bank_socket_desc, ThreadDataPtr->port_number, ThreadDataPtr->num_TTPs, ThreadDataPtr->Client_CIArr, 
             ThreadDataPtr->my_IP_pos);
+// Aisha
+// PUF-Cash 3.0: Alice account. 
+      else if ( strcmp(command_str, "ALICE-ACCOUNT") == 0 ) {
+         // printf("Here in condition 2"); fflush(stdout);
+         AliceAccount(max_string_len, SHP_ptr, Device_socket_desc, &PUFCash_Account_DB_mutex, &ZeroTrust_AuthenToken_DB_mutex, SK_TF, 
+            MIN_WITHDRAW_INCREMENT, Bank_socket_desc, ThreadDataPtr->port_number, ThreadDataPtr->num_TTPs, ThreadDataPtr->Client_CIArr, 
+            ThreadDataPtr->my_IP_pos);
+      }
 
 // =========================
 // =========================

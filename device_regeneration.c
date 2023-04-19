@@ -1352,14 +1352,7 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                { printf("ERROR: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
             break;
 
-   // ======================================
-// ======================================
-// Menu Account
-// Natasha
 
-         case MENU_ACCOUNT:
-            printf("trigger menu\n"); fflush(stdout); 
-            break;
 // ======================================
 // ======================================
 // Alice pays Bob. 
@@ -1380,6 +1373,22 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                transfer_success(trn);
             else
                transfer_fail();
+            break;
+
+// Aisha
+// ======================================
+// ======================================
+// Alice gets account details from TTP_DB.elf
+
+         case MENU_ACCOUNT:
+
+#ifdef DEBUG
+printf("\tALICE ACCOUNT\n"); fflush(stdout); 
+            if ( AliceAccount(MAX_STRING_LEN, &SHP, TTP_index, My_index, Client_CIArr, port_number, num_CIArr, 
+               num_eCt_nonce_bytes, num_eCt) == 0 )
+               { printf("ERROR: FAILED to show account details.\n"); fflush(stdout); }
+            else
+               { printf("SUCCESS: Account details displayed.\n"); fflush(stdout); }
             break;
 
 // ======================================
