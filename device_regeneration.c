@@ -1352,7 +1352,14 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                { printf("ERROR: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
             break;
 
+   // ======================================
+// ======================================
+// Menu Account
+// Natasha
 
+   case MENU_ACCOUNT:
+      printf("trigger menu\n"); fflush(stdout); 
+      break;
 // ======================================
 // ======================================
 // Alice pays Bob. 
