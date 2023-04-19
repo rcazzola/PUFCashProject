@@ -1381,8 +1381,10 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 // Alice gets account details from TTP_DB.elf
 
          case MENU_ACCOUNT:
-         
-            printf("\tALICE ACCOUNT\n"); fflush(stdout); 
+
+// #ifdef DEBUG
+printf("\tALICE ACCOUNT\n"); fflush(stdout); 
+// # endif
             if ( AliceAccount(MAX_STRING_LEN, &SHP, TTP_index, My_index, Client_CIArr, port_number, num_CIArr, 
                num_eCt_nonce_bytes, num_eCt) == 0 )
                { printf("ERROR: FAILED to show account details.\n"); fflush(stdout); }
