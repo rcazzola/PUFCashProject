@@ -85,6 +85,19 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 // ADD CODE
 // ****************************
 
+
+// Sanity check
+//   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
+   if ( Alice_anon_chip_num < 0 )
+      { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
+
+// Sanity check
+   if ( num_eCt < 0 )
+      { printf("ERROR: AliceWithdrawal(): 'num_eCt' is INVALID: %d!\n", num_eCt); exit(EXIT_FAILURE); }
+
+// Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
+   SAP_ptr->chip_num = Alice_anon_chip_num;
+
 // 2) Session Key with Alice THROUGH the TTP using the anonymous DB. 
 // First send control information that the verifier is using to the TTP.
    sprintf(request_str, "%d %d %d", SAP_ptr->use_database_chlngs, SAP_ptr->num_PIs, SAP_ptr->num_POs);
@@ -124,7 +137,7 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    SAP_ptr->SE_final_key = NULL;
 
 // 3) Allocate space for the requested eCt. 
-   int eCt_tot_bytes = num_eCt * SAP_ptr->eCt_num_bytes;
+   int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
 
    unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
    unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
@@ -2127,3 +2140,4 @@ printf("\tTasking Thread %d\n", thread_num); fflush(stdout);
 
    return 0;
    }
+

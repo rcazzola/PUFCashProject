@@ -474,7 +474,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
       return; 
       }
 
-// 9) Get eeCt and heeCt and forward to Alice.
+// 9) Get eeCt and eheCt and forward to Alice.
 // ****************************
 // ADD CODE 
 // ****************************
@@ -1490,5 +1490,6 @@ gettimeofday(&t1, 0); elapsed = (t1.tv_sec-t2.tv_sec)*1000000 + t1.tv_usec-t2.tv
    close(Bank_socket_desc);
    return 0;
    }
+
 
 
