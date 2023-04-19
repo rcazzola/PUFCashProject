@@ -89,12 +89,30 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // 1) Send encrypted Alice chip_num (or anon_chip_num), e.g., SHP_ptr->anon_chip_num and amount of the withdrawal to the TTP. 
 // NOTE: Alice gets this anon_chip_num from the Bank (TI) at startup via an anonymous authentication operation. 
 // ****************************
-// ADD CODE 
+// ADD CODE
+   char num_eCt_str[max_string_len];
+   sprintf(num_eCt_str, "%d", num_eCt);
+
+   if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, TTP_socket_desc) < 0 )
+         { printf("ERROR: AliceWithdrawal(): Failed to send num_eCt %s from FI to Alice\n", num_eCt_str); }
+   else { 
+      printf("SUCCESS: AliceWithdrawal(): Sent num_eCt %s from FI to Alice\n", num_eCt_str);
+   }
 // ****************************
 
 // 2) Get response from TTP on whether Alice has enough funds. If insufficient funds ("ISF"), return 0, else continue.
 // ****************************
-// ADD CODE 
+// ADD CODE
+   char response_str[max_string_len];
+   if ( SockGetB((unsigned char *)response_str, max_string_len, TTP_socket_desc) < 0 ) {
+      printf("ERROR: AliceWithdrawal(): Failed to receive account status from FI to Alice\n");
+   }
+   else { 
+      printf("SUCCESS: Received response %s from FI to Alice\n", response_str);
+      if (strcmp(response_str, "ISF") == 0) {
+         printf("ERROR: AliceWithdrawal(): There isn't sufficient fund for the withdrawal.");
+      }
+   }
 // ****************************
 
 // 3) Generate a shared key between the Bank and Alice THROUGH the FI. The Bank can use timing data from the NAT (or AT if 
@@ -112,8 +130,10 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
    unsigned char *SK_TA = SHP_ptr->SE_final_key; 
    SHP_ptr->SE_final_key = NULL;
 
+
+
 // 4) Get the eeCt and eheCt
-   int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
+   int eCt_tot_bytes = num_eCt * SHP_ptr->eCt_num_bytes;
    int eCt_tot_bytes_adj = eCt_tot_bytes + AES_INPUT_NUM_BYTES - (eCt_tot_bytes % AES_INPUT_NUM_BYTES);
    unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
    unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
@@ -122,7 +142,7 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ****************************
 
 // 5) Decrypt the eCt and heCt with SK_TA.
-   unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
+   unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
    unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
 // ****************************
 // ADD CODE 
@@ -139,6 +159,93 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
    close(TTP_socket_desc);
 
 printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
+#ifdef DEBUG
+#endif
+
+   return 1;
+   }
+
+// Alice Account
+// ========================================================================================================
+// ========================================================================================================
+// Alice authenticates with the TTP and then carries out the account function. 
+
+int AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
+   int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
+   int num_eCt_nonce_bytes, int num_eCt)
+   {
+   int TTP_socket_desc;
+
+printf("\nAliceAccount(): BEGIN\n\n"); fflush(stdout);
+#ifdef DEBUG
+#endif
+
+// Sanity check
+   if ( num_eCt == 0 )
+      { printf("ERROR: AliceAccount(): num_eCt account request is 0!\n"); return 0; }
+
+// AliceWithdrawal authenticates with the TTP using ZeroTrust for a withdrawal. Open socket to TTP. Keep trying 
+// until TTP gets to a point where he is listening. With polling, this should happen right away.
+   int num_retries = 0;
+   while ( OpenSocketClient(max_string_len, Client_CIArr[TTP_index].IP, port_number, &TTP_socket_desc) < 0 )
+      { 
+      printf("INFO: AliceAccount(): Alice trying to connect to Bob to exchange IDs!\n"); fflush(stdout); 
+      usleep(500000); 
+      num_retries++;
+      if ( num_retries > 500 )
+         return 0;
+      }
+
+// ==============================
+// Tell TTP we want to make a withdrawal. This will start the authentication process before the withdrawal.
+   if ( SockSendB((unsigned char *)"ALICE-ACCOUNT", strlen("ALICE-ACCOUNT") + 1, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceAccount(): Failed to send 'WITHDRAW' to TTP!\n"); exit(EXIT_FAILURE); }
+
+
+// ==============================
+// Alice sends TTP her chip number. TTP uses this to fetch an AT from the Bank for Alice's transaction. 
+// NOTE: Unlike Alice and Bob, the TTP does NOT fetch AT in advance (Alice and Bob do it with a menu option).
+
+printf("\AliceAccount(): Alice sending TTP 'chip_num' so TTP can decide if it has an AT for Alice!\n"); fflush(stdout);
+#ifdef DEBUG
+#endif
+
+   char Alice_chip_num_str[max_string_len];
+   sprintf(Alice_chip_num_str, "%d", SHP_ptr->chip_num);
+   if ( SockSendB((unsigned char *)Alice_chip_num_str, strlen(Alice_chip_num_str)+1, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceAccount(): Failed to send 'Alice_chip_num' to TTP!\n"); exit(EXIT_FAILURE); }
+
+// ==============================
+// Do ZeroTrust authentication and key generation between Alice and the TTP.
+   if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, TTP_index, port_number, TTP_socket_desc, My_index) == 0 )
+      return 0;
+
+// ****************************
+// ADD YOUR CODE STARTING HERE.
+// ****************************
+
+// She sends a withdrawal request amount (in $5 increments). The TTP checks Alice's account and forwards her request to Bank. 
+// Bank generates eCt and hash heCt, encrypts (eCt, heCt), sends (eCt, heCt) to the TTP. TTP decrypts and re-encrypts to Alice
+// Alice adds to (eCt, heCt) to her DB.
+//   int status;
+//   status = AliceWithdrawal(max_string_len, SHP_ptr, num_eCt, Client_CIArr, My_index, TTP_socket_desc);
+
+// ===============================
+
+//Receiving account details CODE
+
+char num_eCt_str[max_string_len];
+
+if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 )
+      { printf("ERROR: Failed to receive data from FI to Alice\n"); }
+else { 
+   printf("SUCCESS: Received data from FI to Alice\n");
+   printf("Account Balance: %s", num_eCt_str);
+}
+
+   close(TTP_socket_desc);
+
+printf("\AliceAccount(): DONE\n\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
@@ -264,7 +371,7 @@ printf("\nAliceDoZeroTrust(): CALLED\n"); fflush(stdout);
    if ( other_party_index == -1 )
       { printf("'Other Party' index INVALID %d!\n", other_party_index); exit(EXIT_FAILURE); }
 
-printf("AliceDoZeroTrust(): Get other_party chip_num using IP '%s'\n", 
+printf("AliceDoZeroTrust(): Doing ZeroTrust Part I: Get other_party chip_num using IP '%s'\n", 
    Client_CIArr[other_party_index].IP); fflush(stdout);
 #ifdef DEBUG
 #endif
@@ -277,16 +384,16 @@ printf("AliceDoZeroTrust(): Get other_party chip_num using IP '%s'\n",
    Bob_chip_num = ExchangeIDsConfirmATExists(max_string_len, SHP_ptr, SHP_ptr->chip_num, port_number, I_am_Alice, other_party_socket_desc, 
       &local_AT_status, &remote_AT_status);
 
-printf("AliceDoZeroTrust(): Alice got Bob or TTP's ID %d!\n", Bob_chip_num); fflush(stdout);
+printf("AliceDoZeroTrust(): PART I: PeerTrust: Alice got Bob's ID %d!\n", Bob_chip_num); fflush(stdout);
 #ifdef DEBUG
 #endif
 
 // ==================================
-// If Alice and Bob do NOT each have ATs for each other, then fail. If they do, then at this point, we have only confirmed
+// ZeroTrust: If Alice and Bob do NOT each have ATs for each other, then fail. If they do, then at this point, we have only confirmed
 // that they do and have NOT officially authenticated. However, Alice now attempts to generate a shared key with Bob below. If that
 // fails, then authentication fails.
 
-printf("AliceDoZeroTrust(): remote_AT_status %d\tlocal_AT_status %d\n", remote_AT_status, local_AT_status); fflush(stdout);
+printf("AliceDoZeroTrust(): ZeroTrust: remote_AT_status %d\tlocal_AT_status %d\n", remote_AT_status, local_AT_status); fflush(stdout);
 #ifdef DEBUG
 #endif
 
@@ -389,7 +496,7 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
          return; 
 
 // Now generate a shared key. Assume Alice and Bob (Alice and TTP) have ATs on each other. Exchange the nonces in the ATs, hash them with 
-// the ZeroTrust_LLKs to create two ZHK_A_nonces, XOR them for the shared key. The shared key is stored i the Client_CIArr for the follow-up
+// the PeerTrust_LLKs to create two PHK_A_nonces, XOR them for the shared key. The shared key is stored i the Client_CIArr for the follow-up
 // transaction.
       I_am_Alice = 0;
       if ( ZeroTrustGenSharedKey(max_string_len, SHP_ptr, Alice_chip_num, client_socket_desc, I_am_Alice, num_CIArr, Client_CIArr, My_index) == 1 )
@@ -452,7 +559,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
          exit(EXIT_FAILURE);
       }
 
-// Send the initial transaction request which starts the ZeroTrust authentication process.
+// Send the initial transaction request which starts the PeerTrust authentication process.
    if ( SockSendB((unsigned char *)"ALICE-BOB-AUTHENTICATE", strlen("ALICE-BOB-AUTHENTICATE") + 1, Bob_socket_desc) < 0 )
       { printf("ERROR: AliceTransferDriver(): Failed to send 'ALICE-BOB-AUTHENTICATE' to Bob!\n"); exit(EXIT_FAILURE); }
 
@@ -462,7 +569,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, Bob_index, port_number, Bob_socket_desc, 
       My_index) == 0 )
       {
-      printf("ERROR: AliceTransferDriver(): Alice FAILED with Zero Trust to authenticate Bob -- Aborting transaction!\n"); 
+      printf("ERROR: AliceTransferDriver(): Alice FAILED with Peer/Zero Trust to authenticate Bob -- Aborting transaction!\n"); 
       close(Bob_socket_desc);
       return 0;
       }
@@ -974,7 +1081,7 @@ else
 
 
 // ================================================================================================
-// Generate an LLK with the Bank for ZeroTrust. This is the LLK that we will use as input to the 
+// Generate an LLK with the Bank for PeerTrust. This is the LLK that we will use as input to the 
 // SHA-3 hash (plus a nonce) to generate ZHK_A_nonce (keyed-hash of KK_A -- which is the KEK key 
 // generated in FSB mode). Also need a 'HOSE' LLK (hardware-oriented secure enclave) for Propagation
 // of Providence and PUF-Cash.
@@ -984,13 +1091,13 @@ else
 // and running KEK_Regen. Called by both the device and TTP.
 
 // Setting allow_multiple_LLK to 1 allows MORE THAN one LLK_type = 2 Chlngs to exist. There should be 
-// only one although I have integrated a method to associate a Chlng number with the ZeroTrust_LLKs,
+// only one although I have integrated a method to associate a Chlng number with the PeerTrust_LLKs,
 // so in the future, we can allow more than one.
 //
-// NOTE: GenLLK generates the ZeroTrust_LLK and where we obtain Alice's unique id (chip_num) from the 
+// NOTE: GenLLK generates the PeerTrust_LLK and where we obtain Alice's unique id (chip_num) from the 
 // NON-anonymous DB. I added an ID transfer from IA in DA_Report, which is called as part of device 
 // authentication, i.e., KEK_DeviceAuthentication_SKE. The SHP.chip_num (SHP_ptr->chip_num) field is filled in. 
-// The LLK_type param here indicates whether we are saving the ZeroTrust LLK (2) 
+// The LLK_type param here indicates whether we are saving the PeerTrust LLK (2) 
    int allow_multiple_LLK = 0;
    int open_socket = 1;
    int LLK_type = 2;
@@ -1074,7 +1181,7 @@ printf("Alice fetched %d TTP IPs (MUST BE 1)\tAnd %d Customers\tAnd %d total CIA
    num_TTPs, num_customers, num_CIArr); fflush(stdout);
 #endif
 
-// ********* TESTING ONLY. Find first element that is NOT myself so we can automate process below. This is used by Alice to 
+// ********* TESTING ONLY. For PeerTrust, find first element that is NOT myself so we can automate process below. This is used by Alice to 
 // select a Bob to do a payment transaction with. 
    RandomCustomer_index = -1;
    int My_index = -1;
@@ -1276,7 +1383,7 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 // Open up a socket connection to the Bank. OpenSocketClient returns -1 on failure.
             while ( OpenSocketClient(MAX_STRING_LEN, Bank_IP, port_number, &Bank_socket_desc) < 0 )
                {
-               printf("INFO: Alice waiting to connect to Bank to get ZeroTrust Authentication Tokens!\n"); fflush(stdout); 
+               printf("INFO: Alice waiting to connect to Bank to get PeerTrust Authentication Tokens!\n"); fflush(stdout); 
                usleep(200000);
                }
 
@@ -1316,4 +1423,3 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 
    return 0;
    }
-
