@@ -82,9 +82,27 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    int Alice_anon_chip_num; 
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
-// ADD CODE
+// ADD CODE - Natasha 
 // ****************************
+   char Alice_chip_num_str[max_string_len];
 
+   if ( SockGetB((unsigned char *)Alice_chip_num_str, max_string_len, TTP_socket_desc) < 0 ) {
+      printf("ERROR: AliceWithdrawal(): Failed to receive Alice_anon_chip_num from FI to Bank\n");
+   }
+   else { 
+      printf("SUCCESS: AliceWithdrawal(): Received Alice_anon_chip_num %s from FI to Bank\n", Alice_chip_num_str);
+   }
+   sscanf(Alice_chip_num_str, "%d", &Alice_anon_chip_num);
+
+   char num_eCt_str[max_string_len];
+
+   if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 ) {
+      printf("ERROR: AliceWithdrawal(): Failed to receive num_eCt from FI to Bank\n");
+   }
+   else { 
+      printf("SUCCESS: AliceWithdrawal(): Received num_eCt %s from FI to Bank\n", num_eCt_str);
+   }
+   sscanf(num_eCt_str, "%d", &num_eCt);
 
 // Sanity check
 //   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
