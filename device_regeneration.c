@@ -90,6 +90,8 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // NOTE: Alice gets this anon_chip_num from the Bank (TI) at startup via an anonymous authentication operation. 
 // ****************************
 // ADD CODE
+
+//////////////Aisha//////////////////////////////////////
    char num_eCt_str[max_string_len];
    sprintf(num_eCt_str, "%d", num_eCt);
 
@@ -98,11 +100,13 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
    else { 
       printf("SUCCESS: AliceWithdrawal(): Sent num_eCt %s from FI to Alice\n", num_eCt_str);
    }
-// ****************************
+//////////////////////////////////// ****************************
 
 // 2) Get response from TTP on whether Alice has enough funds. If insufficient funds ("ISF"), return 0, else continue.
 // ****************************
 // ADD CODE
+
+////////////////////Aisha//////////////////////////////
    char response_str[max_string_len];
    if ( SockGetB((unsigned char *)response_str, max_string_len, TTP_socket_desc) < 0 ) {
       printf("ERROR: AliceWithdrawal(): Failed to receive account status from FI to Alice\n");
@@ -113,7 +117,7 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
          printf("ERROR: AliceWithdrawal(): There isn't sufficient fund for the withdrawal.");
       }
    }
-// ****************************
+///////////////////////////////// ****************************
 
 // 3) Generate a shared key between the Bank and Alice THROUGH the FI. The Bank can use timing data from the NAT (or AT if 
 // anonymous) DB to construct the key. To generate a shared secret with the Bank, we just run KEK_SessionKey here, 
@@ -165,7 +169,8 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
    return 1;
    }
 
-// Alice Account
+
+// Alice Account /////////////Aisha///////////////////////////////////////////////
 // ========================================================================================================
 // ========================================================================================================
 // Alice authenticates with the TTP and then carries out the account function. 
@@ -206,7 +211,7 @@ printf("\nAliceAccount(): BEGIN\n\n"); fflush(stdout);
 // Alice sends TTP her chip number. TTP uses this to fetch an AT from the Bank for Alice's transaction. 
 // NOTE: Unlike Alice and Bob, the TTP does NOT fetch AT in advance (Alice and Bob do it with a menu option).
 
-printf("\AliceAccount(): Alice sending TTP 'chip_num' so TTP can decide if it has an AT for Alice!\n"); fflush(stdout);
+printf("AliceAccount(): Alice sending TTP 'chip_num' so TTP can decide if it has an AT for Alice!\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
@@ -251,7 +256,7 @@ printf("\AliceAccount(): DONE\n\n"); fflush(stdout);
 
    return 1;
    }
-
+/////////////////////////////////////////////////////////////////////////////////
 
 // ========================================================================================================
 // ========================================================================================================
@@ -1375,7 +1380,7 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                transfer_fail();
             break;
 
-// Aisha
+///////////////////Aisha/////////////////////////////////
 // ======================================
 // ======================================
 // Alice gets account details from TTP_DB.elf
@@ -1392,6 +1397,7 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
                { printf("SUCCESS: Account details displayed.\n"); fflush(stdout); }
             break;
 
+/////////////////////////////////////////////////////////////
 // ======================================
 // ======================================
 // Contact IA (the Bank) to get a list of ATs that it stores, one unique AT that corresponds to each customer.

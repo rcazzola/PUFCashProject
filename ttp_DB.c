@@ -425,6 +425,8 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
 // ADD CODE
+
+////////////////Aisha////////////////////////////////////
    char num_eCt_str[max_string_len];
 
    if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, Alice_socket_desc) < 0 ) {
@@ -434,7 +436,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
       printf("SUCCESS: AliceWithdrawal(): Received num_eCt %s from FI to Alice\n", num_eCt_str);
    }
    sscanf(num_eCt_str, "%d", &num_eCt);
-// ****************************
+/////////////////////////////////////****************************
 
 // 2) Decrypt them
 // ****************************
@@ -457,6 +459,8 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // 4) Check request against balance, send ISF or HSF to Alice.
 // ****************************
 // ADD CODE
+
+//////////////////Aisha///////////////////////
 char response_str[max_string_len];
    if (num_eCt <= num_eCt_DB) {
       strcpy(response_str, "HSF");
@@ -469,12 +473,14 @@ char response_str[max_string_len];
    else { 
       printf("SUCCESS: AliceWithdrawal(): Sent response %s from FI to Alice\n", response_str);
    }
-// ****************************
+/////////////////////////// ****************************
 
 // 5) Start Bank transaction by sending Alice's request amount and chip_num (or anonomous chip_num).
    if ( SockSendB((unsigned char *)"WITHDRAW", strlen("WITHDRAW") + 1, Bank_socket_desc) < 0 ) {
       printf("ERROR: AliceWithdrawal(): Failed to send 'WITHDRAW' to Bank!\n"); exit(EXIT_FAILURE);
    }
+
+   //////////////////////Aisha//////////////////////////////////
 
    char Alice_chip_num_str[max_string_len];
    sprintf(Alice_chip_num_str, "%d", Alice_chip_num);
@@ -489,6 +495,7 @@ char response_str[max_string_len];
    else { 
       printf("SUCCESS: AliceWithdrawal(): Sent num_eCt %s from FI to Bank\n", num_eCt_str);
    }
+   /////////////////////////////////////////
 
 // 6) Encrypt eID_amt with SK_TF
 // ****************************
@@ -519,7 +526,7 @@ char response_str[max_string_len];
    return;
    }
 
-// Aisha
+
 // Alice Account
 // ========================================================================================================
 // ========================================================================================================
@@ -527,6 +534,7 @@ char response_str[max_string_len];
 // She sends her withdrawal amount. TTP maintains Bank account and checks her balance. If okay, TTP 
 // forwards request to Bank.
 
+/////////////////////Aisha/////////////////////////////
 void AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int Alice_socket_desc,
    pthread_mutex_t *PUFCash_Account_DB_mutex_ptr, pthread_mutex_t *ZeroTrust_AuthenToken_DB_mutex_ptr, 
    unsigned char *SK_TF, int min_withdraw_increment, int Bank_socket_desc, int port_number, int num_CIArr, 
@@ -659,7 +667,7 @@ printf("AliceAccount(): DONE!\n"); fflush(stdout);
    }
 
 
-
+////////////////////////////////////////////////////////////
 // ========================================================================================================
 // ========================================================================================================
 // TTP thread.

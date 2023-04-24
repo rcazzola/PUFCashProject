@@ -85,7 +85,6 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 // ADD CODE
 // ****************************
 
-
 // Sanity check
 //   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
    if ( Alice_anon_chip_num < 0 )
