@@ -82,7 +82,7 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    int Alice_anon_chip_num; 
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
-// ADD CODE - Natasha 
+////// ADD CODE - Natasha 
 // ****************************
    char Alice_chip_num_str[max_string_len];
 
@@ -103,6 +103,8 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
       printf("SUCCESS: AliceWithdrawal(): Received num_eCt %s from FI to Bank\n", num_eCt_str);
    }
    sscanf(num_eCt_str, "%d", &num_eCt);
+
+///////////////////////////////////////////////
 
 // Sanity check
 //   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
