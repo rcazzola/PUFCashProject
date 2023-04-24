@@ -1387,9 +1387,9 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 
          case MENU_ACCOUNT:
 
-// #ifdef DEBUG
+#ifdef DEBUG
 printf("\tALICE ACCOUNT\n"); fflush(stdout); 
-// # endif
+#endif
             if ( AliceAccount(MAX_STRING_LEN, &SHP, TTP_index, My_index, Client_CIArr, port_number, num_CIArr, 
                num_eCt_nonce_bytes, num_eCt) == 0 )
                { printf("ERROR: FAILED to show account details.\n"); fflush(stdout); }
