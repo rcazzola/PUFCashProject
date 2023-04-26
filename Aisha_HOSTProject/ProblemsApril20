@@ -1,0 +1,84 @@
+1) Alice contacts the FI with the request and amount
+
+    device_regeneration.c
+    if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+
+
+2) The FI receives this, and checks against it's own account to see if it has sufficient funds
+
+    ttp_DB.c
+
+    if ( SockGetB((unsigned char *)eID_amt, max_string_len, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_anon_chip_num num_eCt' from Alice!\n"); exit(EXIT_FAILURE); }
+
+
+    sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
+
+
+    pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
+    PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num_encrypted, &TID_DB, &num_eCt_DB, do_update, update_amt); 
+    pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
+
+
+    if(num_eCt > num_eCt_DB)
+        {
+        if ( SockSendB((unsigned char *)"ISF", strlen("ISF")+1, Alice_socket_desc) < 0 )
+            { printf("ERROR: AliceWithdrawal(): Failed to send ISF to Alice!\n"); exit(EXIT_FAILURE); }
+        }else
+        {
+        if ( SockSendB((unsigned char *)"HSF", strlen("HSF")+1, Alice_socket_desc) < 0 )
+            { printf("ERROR: AliceWithdrawal(): Failed to send HSF to Alice!\n"); exit(EXIT_FAILURE); }
+        }
+
+3) If sufficient funds exist, the FI contacts the TI to create eCt and heCt (keyed-hash versions
+of the eCt). 
+
+        ttp_DB.c
+
+        if ( SockSendB((unsigned char *)"WITHDRAW", strlen("WITHDRAW") + 1, Bank_socket_desc) < 0 )
+        { printf("ERROR: AliceWithdrawal(): Failed to send 'WITHDRAW' to Bank!\n"); exit(EXIT_FAILURE); }
+
+           if ( SockSendB((unsigned char *)eID_amt_encrypted, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
+            { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
+
+4) The TI receives this amount
+
+    verifier_regeneration.c
+
+    if ( SockGetB((unsigned char *)eID_amt, max_string_len, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error receiving encrypted Alice chip_num from TTP!\n"); exit(EXIT_FAILURE); }
+
+
+
+5) The TI needs to create eCt and heCT using the LLK. The key used here is an LLK that only the TI and Alice can generate.
+
+    verifier_regeneration.c
+
+    if ( SockGetB((unsigned char *)eLLK, SAP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error receiving encrypted LLK from TTP!\n"); exit(EXIT_FAILURE); }
+
+----------------------------------------------------------------------------
+    DOES NOT WORK
+    THE TI(BANK) WILL WAIT FOREVER FOR THE eLLK TO ARRIVE
+------------------------------------------------------------------------------
+
+POSSIBLE PROBLEMS:
+
+WITH THE FI: ttp_DB.c 
+
+    //The Bank and Alice need to generate a session key. Normally Alice contacts the Bank to do this but we cannot break the chain of custody here between Alice->FI->TI, so the TTP will act as a forwarding agent between the Bank and Alice during KEK_SessionKeyGen process.
+
+   AliceTTPBankSessionKeyGen(max_string_len, SHP_ptr, Alice_socket_desc, Bank_socket_desc);
+
+
+WITH ALICE: device_regeneration.c
+
+    CREATING A SESSION KEY BETWEEN ALICE AND THE BANK THROUGH THE TTP
+
+    int session_or_DA_cobra = 0;
+   if ( KEK_SessionKeyGen(max_string_len, SHP_ptr, TTP_socket_desc, session_or_DA_cobra) == 0 )
+      {
+      printf("ERROR: AliceWithdrawal(): Failed to generate a Session key with Bank THROUGH THE TTP!\n"); fflush(stdout); 
+      return 0;
+      }

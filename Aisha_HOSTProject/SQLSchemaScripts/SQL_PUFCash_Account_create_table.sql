@@ -1,0 +1,10 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS PUFCash_Account ( 
+   id INTEGER PRIMARY KEY,
+   ChipNum INTEGER NOT NULL,
+   TID INTEGER NOT NULL,
+   Amount INTEGER NOT NULL
+   );
+
+CREATE UNIQUE INDEX Account_ID_index ON PUFCash_Account (ID);
