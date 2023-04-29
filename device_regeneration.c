@@ -1354,7 +1354,7 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                num_eCt_nonce_bytes, num_eCt) == 0 )
                { printf("ERROR: Alice FAILED to withdraw %d eCt\n", num_eCt); fflush(stdout); }
             else
-               { printf("ERROR: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
+               { printf("SUCCESS: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
             break;
 
 
