@@ -131,11 +131,11 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
       }
 
    ////////////////////////////////Rachel/////////////////////
-   if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+   /*if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): ALICE failed to send ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
 
 
-   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);
+   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);*/
    ////////////////////////////////////////////////////////////
 
 
