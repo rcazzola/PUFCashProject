@@ -212,7 +212,7 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 
    printf("Done XORing\n");
       hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
-   printf("DOne hashing\n");
+   printf("Done hashing\n");
    //////////////////////////////////////////////////////////////
 
 

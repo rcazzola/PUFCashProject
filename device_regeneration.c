@@ -97,9 +97,6 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 
    if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, TTP_socket_desc) < 0 )
          { printf("ERROR: AliceWithdrawal(): Failed to send num_eCt %s from FI to Alice\n", num_eCt_str); }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Sent num_eCt %s from FI to Alice\n", num_eCt_str);
-   }
 //////////////////////////////////// ****************************
 
 // 2) Get response from TTP on whether Alice has enough funds. If insufficient funds ("ISF"), return 0, else continue.
@@ -131,11 +128,11 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
       }
 
    ////////////////////////////////Rachel/////////////////////
-   /*if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+   if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): ALICE failed to send ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
 
 
-   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);*/
+   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);
    ////////////////////////////////////////////////////////////
 
 
@@ -154,12 +151,12 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ADD CODE 
 // ****************************
 ///////////////////////Rachel///////////////////////
-   if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+/* if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eeCt from TTP!\n"); exit(EXIT_FAILURE); }
 
    if ( SockGetB((unsigned char *)eheCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eheCt from TTP!\n"); exit(EXIT_FAILURE); }
-
+*/
 ///////////////////////////////////////////////////////
 
 
