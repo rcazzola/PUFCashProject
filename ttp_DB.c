@@ -480,23 +480,6 @@ char response_str[max_string_len];
       printf("ERROR: AliceWithdrawal(): Failed to send 'WITHDRAW' to Bank!\n"); exit(EXIT_FAILURE);
    }
 
-   //////////////////////Aisha//////////////////////////////////
-
-   char Alice_chip_num_str[max_string_len];
-   sprintf(Alice_chip_num_str, "%d", Alice_chip_num);
-   if ( SockSendB((unsigned char *)Alice_chip_num_str, strlen(Alice_chip_num_str)+1, Bank_socket_desc) < 0 )
-         { printf("ERROR: AliceWithdrawal(): Failed to send Alice_chip_num %s from FI to Bank\n", Alice_chip_num_str); }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Sent Alice_chip_num %s from FI to Bank\n", Alice_chip_num_str);
-   }
-
-   if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Bank_socket_desc) < 0 )
-         { printf("ERROR: AliceWithdrawal(): Failed to send num_eCt %s from FI to Bank\n", num_eCt_str); }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Sent num_eCt %s from FI to Bank\n", num_eCt_str);
-   }
-   /////////////////////////////////////////
-
 // 6) Encrypt eID_amt with SK_TF
 // ****************************
 // ADD CODE 
@@ -506,6 +489,21 @@ char response_str[max_string_len];
 // break the chain of custody here between Alice->FI->TI, so the TTP will act as a forwarding agent between 
 // the Bank and Alice during KEK_SessionKeyGen process.
    AliceTTPBankSessionKeyGen(max_string_len, SHP_ptr, Alice_socket_desc, Bank_socket_desc);
+
+   ////////////////////////Rachel//////////////////////////////
+   unsigned char *LLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
+
+
+  if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to get LLK from Alice!\n"); exit(EXIT_FAILURE); }
+   
+   printf("LLK on TTP side = %s\n", LLK);
+
+
+    if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): TTP failed to send ZeroTrust_LLK to Bank!\n"); exit(EXIT_FAILURE); }
+   //////////////////////////////////////////////////////////////
+
 
 // ===============================
 // 8) Get ACK/NAK from Bank
@@ -522,10 +520,44 @@ char response_str[max_string_len];
 // ADD CODE 
 // ****************************
 
+   ////////////////////////Rachel/////////////////////
+   int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
 
+   unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+   unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+
+
+   printf("num_eCt in TTP = %d\n", num_eCt);
+   printf("SIZE OF eCt_tot_bytes = %d\n", eCt_tot_bytes);
+
+   /*//get eeCt and eheCt from bank
+   printf("--------WAITING FOR eeCt/eheCT--------\n");
+
+   if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to get 'eeCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
+
+   if ( SockGetB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to get 'eheCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
+
+
+   //send eeCt and eheCt to Alice
+   if ( SockSendB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eeCt_buffer to Alice\n"); exit(EXIT_FAILURE); }
+
+   if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eheCt_buffer to Alice\n"); exit(EXIT_FAILURE); }
+      printf("--------DONE WAITING FOR eeCt/eheCT--------\n");
+   */
+
+  /////////////////////////////////////////////////////////
    return;
    }
 
+
+
+// ****************************
+// ADD YOUR CODE STARTING HERE.
+// ****************************
 
 // Alice Account
 // ========================================================================================================
@@ -550,7 +582,7 @@ printf("AliceAccount(): BEGIN!\n"); fflush(stdout);
 // ===============================
 // ZeroTrust Alice-TTP authentication encryption key generation: Start by getting Alice_chip_num so we can get a specific AT 
 // from the Bank. Also needed to access her Account Table below.
-   int chip_num;
+int chip_num;
 
 printf("AliceAccount(): Getting chip_num from Alice so we can fetch an AT for Alice from the Bank!\n"); fflush(stdout); 
 #ifdef DEBUG
@@ -626,13 +658,8 @@ printf("AliceAccount(): Exchange ID's completed successfully with Alice's chip_n
    if ( SK_FA == NULL )
       { printf("ERROR: AliceAccount(): SK_FA from ZeroTrust authen/key gen is NULL!\n"); exit(EXIT_FAILURE); }
 
-// ****************************
-// ADD YOUR CODE STARTING HERE.
-// ****************************
-
 int TID = 0;
 int num_eCt = 0;
-
 
 // Only allow one record to exist for each customer at this point.
       if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, 

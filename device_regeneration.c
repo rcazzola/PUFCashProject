@@ -130,6 +130,15 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
       return 0;
       }
 
+   ////////////////////////////////Rachel/////////////////////
+   if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): ALICE failed to send ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
+
+
+   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);
+   ////////////////////////////////////////////////////////////
+
+
    int SK_TA_num_bytes = SHP_ptr->SE_target_num_key_bits/8;
    unsigned char *SK_TA = SHP_ptr->SE_final_key; 
    SHP_ptr->SE_final_key = NULL;
@@ -144,6 +153,15 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ****************************
 // ADD CODE 
 // ****************************
+///////////////////////Rachel///////////////////////
+   if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eeCt from TTP!\n"); exit(EXIT_FAILURE); }
+
+   if ( SockGetB((unsigned char *)eheCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eheCt from TTP!\n"); exit(EXIT_FAILURE); }
+
+///////////////////////////////////////////////////////
+
 
 // 5) Decrypt the eCt and heCt with SK_TA.
    unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
@@ -170,11 +188,23 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
    }
 
 
-// Alice Account /////////////Aisha///////////////////////////////////////////////
+
+// Alice Account ///////////
 // ========================================================================================================
 // ========================================================================================================
 // Alice authenticates with the TTP and then carries out the account function. 
 
+// ****************************
+// ADD YOUR CODE STARTING HERE.
+// ****************************
+
+// She sends a withdrawal request amount (in $5 increments). The TTP checks Alice's account and forwards her request to Bank. 
+// Bank generates eCt and hash heCt, encrypts (eCt, heCt), sends (eCt, heCt) to the TTP. TTP decrypts and re-encrypts to Alice
+// Alice adds to (eCt, heCt) to her DB.
+//   int status;
+//   status = AliceWithdrawal(max_string_len, SHP_ptr, num_eCt, Client_CIArr, My_index, TTP_socket_desc);
+
+////////////////////Aisha///////////////////////////////////////////////
 int AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
    int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
    int num_eCt_nonce_bytes, int num_eCt)
@@ -225,16 +255,6 @@ printf("AliceAccount(): Alice sending TTP 'chip_num' so TTP can decide if it has
    if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, TTP_index, port_number, TTP_socket_desc, My_index) == 0 )
       return 0;
 
-// ****************************
-// ADD YOUR CODE STARTING HERE.
-// ****************************
-
-// She sends a withdrawal request amount (in $5 increments). The TTP checks Alice's account and forwards her request to Bank. 
-// Bank generates eCt and hash heCt, encrypts (eCt, heCt), sends (eCt, heCt) to the TTP. TTP decrypts and re-encrypts to Alice
-// Alice adds to (eCt, heCt) to her DB.
-//   int status;
-//   status = AliceWithdrawal(max_string_len, SHP_ptr, num_eCt, Client_CIArr, My_index, TTP_socket_desc);
-
 // ===============================
 
 //Receiving account details CODE
@@ -250,13 +270,15 @@ else {
 
    close(TTP_socket_desc);
 
-printf("\AliceAccount(): DONE\n\n"); fflush(stdout);
+printf("\nAliceAccount(): DONE\n\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
    return 1;
    }
 /////////////////////////////////////////////////////////////////////////////////
+
+
 
 // ========================================================================================================
 // ========================================================================================================

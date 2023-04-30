@@ -172,16 +172,49 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 // ****************************
 // ADD CODE
 // ****************************
+   //////////////////Rachel/////////////////////////
+   printf("----------BANK RECEIVING Non-Encrypted LLK-----------\n");
+   if ( SockGetB((unsigned char *)LLK, SAP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error receiving non-encrypted LLK from TTP!\n"); exit(EXIT_FAILURE); }
+   printf("----------BANK GOT Non-encrypted LLK-----------\n");
+   //////////////////////////////////////////////////////////////
 
 // 5) Decrypt LLK
 // ****************************
 // ADD CODE
 // ****************************
 
+
+
 // 6) Create heCt using Alice's LLK. XOR in Alice's LLK with the each eCt and hash each of them to create the heCt. 
 // ****************************
 // ADD CODE
 // ****************************
+   
+   //////////////////////Rachel/////////////////////
+   printf("num_eCt in BANK = %d\n", num_eCt);
+   printf("eCT_tot_bytes = %d\n", eCt_tot_bytes);
+   // printf("LLK total bytes = %d\n", SAP_ptr->ZHK_A_num_bytes);
+   int LLK_index = 0;
+   unsigned char *new_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+   memcpy(new_eCt_buffer, eCt_buffer, eCt_tot_bytes);
+
+   for(int i = 0; i < eCt_tot_bytes; i++)
+   {
+      heCt_buffer[i] = eCt_buffer[i] ^ LLK[LLK_index];
+      // eCt_buffer[i] ^ LLK[LLK_index];
+      LLK_index++;
+      if(LLK_index >= SAP_ptr->ZHK_A_num_bytes)
+      {
+         LLK_index = 0;
+      }
+   }
+
+   printf("Done XORing\n");
+      hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
+   printf("DOne hashing\n");
+   //////////////////////////////////////////////////////////////
+
 
 // 7) Store the eCt in the PUFCash_WRec.db as one big blob. NOTE: Multiple outstanding withdrawals is NOT supported 
 // right now because the LLK is used as a unique identifier in the PUFCash_WRec table of the PUFCash database (database
@@ -194,6 +227,7 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
       heCt_buffer, eCt_tot_bytes, num_eCt);
    pthread_mutex_unlock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
 
+   printf("Added eCT to DB\n");
 
 // 8) Encrypt eCt and heCt with SK_TA to eeCt and eheCt
 // ****************************
