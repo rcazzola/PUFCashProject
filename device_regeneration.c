@@ -29,7 +29,7 @@ extern int getpagesize (void)  __THROW __attribute__ ((__const__));
 
 // Forward declarations
 int AliceDoZeroTrust(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, ClientInfoStruct *Client_CIArr, 
-   int num_CIArr, int other_party_index, int port_number, int other_party_socket_desc, int My_index);
+int num_CIArr, int other_party_index, int port_number, int other_party_socket_desc, int My_index);
 
 
 // ========================================================================================================
