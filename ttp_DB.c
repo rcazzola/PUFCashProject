@@ -426,22 +426,19 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // ****************************
 // ADD CODE
 
-////////////////Aisha////////////////////////////////////
-   char num_eCt_str[max_string_len];
-
-   if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, Alice_socket_desc) < 0 ) {
-      printf("ERROR: AliceWithdrawal(): Failed to receive num_eCt from FI to Alice\n");
-   }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Received num_eCt %s from FI to Alice\n", num_eCt_str);
-   }
-   sscanf(num_eCt_str, "%d", &num_eCt);
+////////////////AishaNEW////////////////////////////////////
+   if ( SockGetB((unsigned char *)eID_amt, max_string_len, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_anon_chip_num num_eCt' from Alice!\n"); exit(EXIT_FAILURE); }
 /////////////////////////////////////****************************
 
 // 2) Decrypt them
 // ****************************
 // ADD CODE 
 // ****************************
+
+   //////////////Rachel//////////////////////
+   sscanf(eID_amt, "%d %d", &Alice_anon_chip_num, &num_eCt);
+   ////////////////////////////////////////
 
 // ===============================
 // 3) TTP checks Alice's Bank account and confirms she is allowed to withdraw this amount. NOTE: Use Alice's chip_num
@@ -460,19 +457,24 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // ****************************
 // ADD CODE
 
-//////////////////Aisha///////////////////////
-char response_str[max_string_len];
-   if (num_eCt <= num_eCt_DB) {
-      strcpy(response_str, "HSF");
-   }
-   else {
-      strcpy(response_str, "ISF");
-   }
-   if ( SockSendB((unsigned char *)response_str, strlen(response_str)+1, Alice_socket_desc) < 0 )
-         { printf("ERROR: AliceWithdrawal(): Failed to send response %s from FI to Alice\n", response_str); }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Sent response %s from FI to Alice\n", response_str);
-   }
+//////////////////AishaNEW///////////////////////
+printf("NUM_ECT_DB = %d\n", num_eCt_DB);
+if(num_eCt > num_eCt_DB) {
+   if ( SockSendB((unsigned char *)"ISF", strlen("ISF")+1, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to send ISF to Alice!\n"); exit(EXIT_FAILURE); }
+}
+else {
+   if ( SockSendB((unsigned char *)"HSF", strlen("HSF")+1, Alice_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to send HSF to Alice!\n"); exit(EXIT_FAILURE); }
+
+       do_update = 1;
+       update_amt = num_eCt_DB - num_eCt;
+
+      printf("UPDATING HERE\n");
+      pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
+      PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_anon_chip_num, &TID_DB, &num_eCt_DB, do_update, update_amt); 
+      pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
+}
 /////////////////////////// ****************************
 
 // 5) Start Bank transaction by sending Alice's request amount and chip_num (or anonomous chip_num).
@@ -484,6 +486,15 @@ char response_str[max_string_len];
 // ****************************
 // ADD CODE 
 // ****************************
+
+////////////////Rachel///////////////////////////
+unsigned char *eID_amt_plaintext = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+unsigned char *eID_amt_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
+   { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
+
+////////////////////////////////////////////////////
 
 // 7) The Bank and Alice need to generate a session key. Normally Alice contacts the Bank to do this but we cannot
 // break the chain of custody here between Alice->FI->TI, so the TTP will act as a forwarding agent between 
@@ -530,7 +541,7 @@ char response_str[max_string_len];
    printf("num_eCt in TTP = %d\n", num_eCt);
    printf("SIZE OF eCt_tot_bytes = %d\n", eCt_tot_bytes);
 
-   /*//get eeCt and eheCt from bank
+   //get eeCt and eheCt from bank
    printf("--------WAITING FOR eeCt/eheCT--------\n");
 
    if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
@@ -547,7 +558,6 @@ char response_str[max_string_len];
    if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eheCt_buffer to Alice\n"); exit(EXIT_FAILURE); }
       printf("--------DONE WAITING FOR eeCt/eheCT--------\n");
-   */
 
   /////////////////////////////////////////////////////////
    return;
@@ -555,9 +565,9 @@ char response_str[max_string_len];
 
 
 
-// ****************************
-// ADD YOUR CODE STARTING HERE.
-// ****************************
+// ********************
+// ADD CODE 
+// ********************
 
 // Alice Account
 // ========================================================================================================

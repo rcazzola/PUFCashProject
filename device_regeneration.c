@@ -91,28 +91,43 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ****************************
 // ADD CODE
 
-//////////////Aisha//////////////////////////////////////
-   char num_eCt_str[max_string_len];
-   sprintf(num_eCt_str, "%d", num_eCt);
+//////////////Aisha_NEW//////////////////////////////////////
+printf("\tAliceWithdrawal(): Alice sending TTP encrypted 'chip_num' and amount of the withdrawal\n"); fflush(stdout);
+#ifdef DEBUG
+#endif
 
-   if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, TTP_socket_desc) < 0 )
-         { printf("ERROR: AliceWithdrawal(): Failed to send num_eCt %s from FI to Alice\n", num_eCt_str); }
+
+// char Alice_chip_num_str_encrypt[max_string_len];
+unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);
+unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+//holds unencrypted chip_num and withdrawal amount
+sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
+
+//encrypt that string and store it in eID_amt
+//encrypt_256(Client_CIArr[My_index].AliceBob_shared_key, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, max_string_len, eID_amt);
+
+   if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+
+   // if ( SockSendB((unsigned char *)eID_amt, strlen(eID_amt)+1, TTP_socket_desc) < 0 )
+   //    { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
 //////////////////////////////////// ****************************
 
 // 2) Get response from TTP on whether Alice has enough funds. If insufficient funds ("ISF"), return 0, else continue.
 // ****************************
 // ADD CODE
 
-////////////////////Aisha//////////////////////////////
-   char response_str[max_string_len];
-   if ( SockGetB((unsigned char *)response_str, max_string_len, TTP_socket_desc) < 0 ) {
-      printf("ERROR: AliceWithdrawal(): Failed to receive account status from FI to Alice\n");
-   }
-   else { 
-      printf("SUCCESS: Received response %s from FI to Alice\n", response_str);
-      if (strcmp(response_str, "ISF") == 0) {
-         printf("ERROR: AliceWithdrawal(): There isn't sufficient fund for the withdrawal.");
-      }
+////////////////////Aisha_NEW//////////////////////////////
+   char TTP_Sufficient_Funds_str[max_string_len];
+
+   if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Error in Alice receiving sufficient funds from TTP!\n"); exit(EXIT_FAILURE); }
+
+   if(strcmp(TTP_Sufficient_Funds_str, "ISF") == 0)
+   {
+      printf("-------------------------INSUFFICIENT FUNDS-------------------------\n");
+      return 0;
    }
 ///////////////////////////////// ****************************
 
@@ -151,12 +166,12 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ADD CODE 
 // ****************************
 ///////////////////////Rachel///////////////////////
-/* if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+   if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eeCt from TTP!\n"); exit(EXIT_FAILURE); }
 
    if ( SockGetB((unsigned char *)eheCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving eheCt from TTP!\n"); exit(EXIT_FAILURE); }
-*/
+
 ///////////////////////////////////////////////////////
 
 
@@ -167,6 +182,12 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ADD CODE 
 // ****************************
 
+   //////////////////////Rachel////////////////////////
+   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes_adj, eCt_buffer);
+   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes_adj, heCt_buffer);
+
+   ///////////////////////////////////////////////////////
+
 // ==============================
 // 6) Add Alice eCt and heCt blobs to DB, along with her LLK. NOTE: Multiple outstanding withdrawals is NOT supported 
 // right now because the LLK is used as a unique identifier in the PUFCash_WRec table of the PUFCash database (database
@@ -174,6 +195,18 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
    PUFCashAdd_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, SHP_ptr->ZeroTrust_LLK, 
       SHP_ptr->KEK_LLK_num_bytes, eCt_buffer, heCt_buffer, eCt_tot_bytes, num_eCt);
 
+   ///////////////////Rachel/////////////////////
+   int num_ect = 0;
+   int dummy;
+
+
+   PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect);
+
+   printf("num_ect we got = %d\n", num_ect);
+
+   printf("ADDED num_eCT to DB\n");
+
+   ///////////////////////////////////////////
 
    close(TTP_socket_desc);
 
@@ -186,14 +219,14 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
 
 
 
-// Alice Account ///////////
+// Alice Account /////////////////////////////////////////////////////////////////
 // ========================================================================================================
 // ========================================================================================================
 // Alice authenticates with the TTP and then carries out the account function. 
 
-// ****************************
-// ADD YOUR CODE STARTING HERE.
-// ****************************
+// *******************
+// ADD CODE
+// *******************
 
 // She sends a withdrawal request amount (in $5 increments). The TTP checks Alice's account and forwards her request to Bank. 
 // Bank generates eCt and hash heCt, encrypts (eCt, heCt), sends (eCt, heCt) to the TTP. TTP decrypts and re-encrypts to Alice
@@ -261,9 +294,28 @@ char num_eCt_str[max_string_len];
 if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 )
       { printf("ERROR: Failed to receive data from FI to Alice\n"); }
 else { 
-   printf("SUCCESS: Received data from FI to Alice\n");
-   printf("Account Balance: %s", num_eCt_str);
+   printf("SUCCESS: Received account details from FI to Alice\n");
+   int amount;
+   sscanf(num_eCt_str, "%d", &amount);
+   int cents = amount % 100;
+   int dollars = amount / 100;
+   printf("Account Balance: $%d.%02d\n", dollars, cents);
+   // printf("Account Balance: %s\n", num_eCt_str);
 }
+
+   // Alice's local balance 
+   int num_ect_local = 0;
+   int dummy;
+
+   PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect_local);
+   printf("num_ect we got = %d\n", num_ect_local);
+
+
+   printf("Available Balance after Withdrawing:\n");
+   int cents = num_ect_local % 100;
+   int dollars = num_ect_local / 100;
+   printf("Alice's Balance: $%d.%02d\n", dollars, cents);
+
 
    close(TTP_socket_desc);
 

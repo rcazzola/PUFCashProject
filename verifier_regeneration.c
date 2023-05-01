@@ -82,29 +82,17 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    int Alice_anon_chip_num; 
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
-////// ADD CODE - Natasha 
+////// ADD CODE - NatashaNEW 
 // ****************************
-   char Alice_chip_num_str[max_string_len];
+if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
+   { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
 
-   if ( SockGetB((unsigned char *)Alice_chip_num_str, max_string_len, TTP_socket_desc) < 0 ) {
-      printf("ERROR: AliceWithdrawal(): Failed to receive Alice_anon_chip_num from FI to Bank\n");
-   }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Received Alice_anon_chip_num %s from FI to Bank\n", Alice_chip_num_str);
-   }
-   sscanf(Alice_chip_num_str, "%d", &Alice_anon_chip_num);
+   // decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
 
-   char num_eCt_str[max_string_len];
 
-   if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 ) {
-      printf("ERROR: AliceWithdrawal(): Failed to receive num_eCt from FI to Bank\n");
-   }
-   else { 
-      printf("SUCCESS: AliceWithdrawal(): Received num_eCt %s from FI to Bank\n", num_eCt_str);
-   }
-   sscanf(num_eCt_str, "%d", &num_eCt);
+   // sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);
+   sscanf(eID_amt, "%d %d", &Alice_anon_chip_num, &num_eCt);
 
-///////////////////////////////////////////////
 
 // Sanity check
 //   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
@@ -117,6 +105,21 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 
 // Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
    SAP_ptr->chip_num = Alice_anon_chip_num;
+
+// Sanity check
+//   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
+   if ( Alice_anon_chip_num < 0 )
+      { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
+
+// Sanity check
+   if ( num_eCt < 0 )
+      { printf("ERROR: AliceWithdrawal(): 'num_eCt' is INVALID: %d!\n", num_eCt); exit(EXIT_FAILURE); }
+
+// Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
+   SAP_ptr->chip_num = Alice_anon_chip_num;
+
+////////////////////////////////////////////////////
+
 
 // 2) Session Key with Alice THROUGH the TTP using the anonymous DB. 
 // First send control information that the verifier is using to the TTP.
@@ -234,11 +237,28 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 // ADD CODE
 // ****************************
 
+////////////////Rachel//////////////////
+unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+
+// encrypt_256(SK_TA, SAP_ptr->AES_IV, eCt_buffer, eCt_tot_bytes, eeCt_buffer);
+// encrypt_256(SK_TA, SAP_ptr->AES_IV, heCt_buffer, eCt_tot_bytes, eheCt_buffer);
+
+////////////////////////////////////////////
+
 // 9) Transmit encrypted eeCt and eheCt to FI
 // ****************************
 // ADD CODE
 // ****************************
 
+/////////////////Rachel//////////////
+printf("----------BANK SENDING non-encrypted eCT and eheCT buffers to TTP-----------\n");
+ if ( SockSendB((unsigned char *)eCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Bank failed to send 'eeCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
+ if ( SockSendB((unsigned char *)heCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Bank failed to send 'eheCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
+
+////////////////////////////////////////
 
    return;
    }
