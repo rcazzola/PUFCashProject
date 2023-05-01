@@ -421,7 +421,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 
 // 1) Get Alice's chip_num and her encrypted withdrawal amount. 
    char *Alice_request_str[max_string_len];
-   int Alice_anon_chip_num, num_eCt;
+   int Alice_chip_num_encrypted, num_eCt;
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
 // ADD CODE
@@ -437,7 +437,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // ****************************
 
    //////////////Rachel//////////////////////
-   sscanf(eID_amt, "%d %d", &Alice_anon_chip_num, &num_eCt);
+   sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
    ////////////////////////////////////////
 
 // ===============================
@@ -450,7 +450,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
    int update_amt = 0;
 
    pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
-   PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID_DB, &num_eCt_DB, do_update, update_amt); 
+   PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num_encrypted, &TID_DB, &num_eCt_DB, do_update, update_amt); 
    pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
 
 // 4) Check request against balance, send ISF or HSF to Alice.
