@@ -512,15 +512,17 @@ printf("ZeroTrustGenSharedKey(): Bob/TTP sending nonce to Alice!\n"); fflush(std
    int byte_num;
    for ( byte_num = 0; byte_num < SHP_ptr->ZHK_A_num_bytes; byte_num++ )
       key_shard[byte_num] = SHP_ptr->ZeroTrust_LLK[byte_num] ^ nonce_other_party[byte_num];
-
+/*
 // Sanity check. 
       if ( SHP_ptr->ZHK_A_num_bytes != HASH_IN_LEN_BYTES || HASH_IN_LEN_BYTES != HASH_OUT_LEN_BYTES )
          { 
          printf("ERROR: ZeroTrustGenSharedKey(): SHP_ptr->ZHK_A_num_byte %d MUST be EQUAL TO HASH_IN_LEN_BYTES %d == HASH_OUT_LEN_BYTES %d!\n", 
             SHP_ptr->ZHK_A_num_bytes, HASH_IN_LEN_BYTES, HASH_OUT_LEN_BYTES); exit(EXIT_FAILURE); 
          }
-
    hash_256(max_string_len, HASH_IN_LEN_BYTES, key_shard, HASH_IN_LEN_BYTES, key_shard_hash);
+   */
+   hash_256(max_string_len, SHP_ptr->ZHK_A_num_bytes, key_shard, SHP_ptr->ZHK_A_num_bytes, key_shard_hash);
+
 
 // The second shared secret is the ZHK_A_nonce, which incorporates the ZeroTrust_LLK for the other party.
    for ( byte_num = 0; byte_num < SHP_ptr->ZHK_A_num_bytes; byte_num++ )
@@ -625,7 +627,7 @@ printf("ZeroTrustGenSharedKey(): REFRESHING AT DB!\n"); fflush(stdout);
 // TO_DO: we use the same ZeroTrust_LLK here, which implies the same chlng_num element.
       for ( byte_num = 0; byte_num < SHP_ptr->ZHK_A_num_bytes; byte_num++ )
          ZHK_A_nonce_new[byte_num] = AT_nonce_new[byte_num] ^ SHP_ptr->ZeroTrust_LLK[byte_num];
-
+/* 
 // Sanity check. 
       if ( SHP_ptr->ZHK_A_num_bytes != HASH_IN_LEN_BYTES || HASH_IN_LEN_BYTES != HASH_OUT_LEN_BYTES )
          { 
@@ -634,6 +636,8 @@ printf("ZeroTrustGenSharedKey(): REFRESHING AT DB!\n"); fflush(stdout);
          }
 
       hash_256(max_string_len, HASH_IN_LEN_BYTES, ZHK_A_nonce_new, HASH_OUT_LEN_BYTES, ZHK_A_nonce_new_hash);
+*/
+      hash_256(max_string_len, SHP_ptr->ZHK_A_num_bytes, ZHK_A_nonce_new, SHP_ptr->ZHK_A_num_bytes, ZHK_A_nonce_new_hash);
 
 
 #ifdef DEBUG
