@@ -3258,6 +3258,10 @@ printf("\t\tZeroTrust_Enroll(): Processing byte_num %d\tnonce_byte_pos %d!\n", b
 #ifdef DEBUG
 printf("\t\tZeroTrust_Enroll(): Hashing!\n"); fflush(stdout);
 #endif
+////////////////////////      OLD STUFF - Natasha  ////////////////////////
+// // Hash it
+//       hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
+/////////////////////////////////////////////////////////////////////////////
 
 // Sanity check. 
       if ( ZHK_A_num_bytes != HASH_IN_LEN_BYTES || HASH_IN_LEN_BYTES != HASH_OUT_LEN_BYTES )
@@ -3265,9 +3269,8 @@ printf("\t\tZeroTrust_Enroll(): Hashing!\n"); fflush(stdout);
          printf("ERROR: ZeroTrust_Enroll(): SHP_ptr->ZHK_A_num_byte %d MUST be EQUAL TO HASH_IN_LEN_BYTES %d == HASH_OUT_LEN_BYTES %d!\n", 
             ZHK_A_num_bytes, HASH_IN_LEN_BYTES, HASH_OUT_LEN_BYTES); exit(EXIT_FAILURE); 
          }
-
-// Hash it
-      hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
+         
+hash_256(max_string_len, ZHK_A_num_bytes, hash_input, ZHK_A_num_bytes, hash_output);
 
 #ifdef DEBUG
 PrintHeaderAndHexVals("ZeroTrust_Enroll(): ZHK_A_nonce:\n", ZHK_A_num_bytes, hash_output, 32);
