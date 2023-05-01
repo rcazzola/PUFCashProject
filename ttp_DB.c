@@ -436,6 +436,9 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // ADD CODE 
 // ****************************
 
+   ////////////////////////NATASHA////////////////////////////////
+   decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str)
+
    //////////////Rachel//////////////////////
    sscanf(eID_amt, "%d %d", &Alice_anon_chip_num, &num_eCt);
    ////////////////////////////////////////
