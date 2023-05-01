@@ -436,10 +436,11 @@ if ( SockGetB((unsigned char *)eID_amt, max_string_len, Alice_socket_desc) < 0 )
 // ****************************
 // ADD CODE 
 // ****************************
-   // decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, strlen(eID_amt), (unsigned char *)Alice_request_str);
+////////////////////////Aisha////////////////////////////////
+   decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
    // printf("ALICE DECRYPTED STRING = %s\n", Alice_request_str);
-   // sscanf(Alice_request_str, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
-   sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
+   sscanf(Alice_request_str, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
+////////////////////////////////////////////////////////////
 
 // ===============================
 // 3) TTP checks Alice's Bank account and confirms she is allowed to withdraw this amount. NOTE: Use Alice's chip_num
@@ -491,21 +492,14 @@ if(num_eCt > num_eCt_DB)
    unsigned char *eID_amt_plaintext = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
    unsigned char *eID_amt_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
-
+//////////////////////////////Aisha///////////////////////////////////
    // strcpy(eID_amt_plaintext, Alice_request_str);
 
-
-   // encrypt_256(SK_TF, SHP_ptr->AES_IV, eID_amt_plaintext, AES_INPUT_NUM_BYTES, eID_amt_encrypted);
+   encrypt_256(SK_TF, SHP_ptr->AES_IV, Alice_request_str, AES_INPUT_NUM_BYTES, eID_amt_encrypted);
 
    if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
    { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
-
-   // if ( SockSendB((unsigned char *)eID_amt_plaintext, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
-   // { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
-
-   // if ( SockSendB((unsigned char *)eID_amt_encrypted, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
-   // { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
-
+///////////////////////////////////////////////////////////////////////
 
 // 7) The Bank and Alice need to generate a session key. Normally Alice contacts the Bank to do this but we cannot
 // break the chain of custody here between Alice->FI->TI, so the TTP will act as a forwarding agent between 
