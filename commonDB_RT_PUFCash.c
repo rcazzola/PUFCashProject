@@ -630,6 +630,12 @@ printf("PUFCashGet_WRec_Data(): CALLED!\n"); fflush(stdout);
    FreeStringsDataForRow(&row_strings_struct);
    ret_val = 1;
 
+   ///////NEW//////////
+   if(get_ids_or_eCt_blobs == 1 ) {
+      return 1;
+   }
+   ////////////////////
+   
 // Also get the eCt and heCt blobs if requested.
    if ( get_ids_or_eCt_blobs == 2 )
       {

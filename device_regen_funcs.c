@@ -3262,6 +3262,10 @@ printf("\t\tZeroTrust_Enroll(): Hashing!\n"); fflush(stdout);
 // // Hash it
 //       hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
 /////////////////////////////////////////////////////////////////////////////
+////////////////////////      OLD STUFF - Natasha  ////////////////////////
+// // Hash it
+//       hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
+/////////////////////////////////////////////////////////////////////////////
 
 // Sanity check. 
       if ( ZHK_A_num_bytes != HASH_IN_LEN_BYTES || HASH_IN_LEN_BYTES != HASH_OUT_LEN_BYTES )

@@ -88,6 +88,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
    { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
 
    decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
+   
    sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);
    printf("eID_amt in BANK = %s\n", Alice_request_str);
 
@@ -105,7 +106,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
    SAP_ptr->chip_num = Alice_anon_chip_num;
 
 // Sanity check
-//   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
+// if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
    if ( Alice_anon_chip_num < 0 )
       { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
 
@@ -219,7 +220,9 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
    }
 
    printf("Done XORing\n");
-      hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
+   
+   hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
+   
    printf("Done hashing\n");
    //////////////////////////////////////////////////////////////
 
