@@ -472,7 +472,7 @@ else {
 
       printf("UPDATING HERE\n");
       pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
-      PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_anon_chip_num, &TID_DB, &num_eCt_DB, do_update, update_amt); 
+      PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num_encrypted, &TID_DB, &num_eCt_DB, do_update, update_amt); 
       pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
 }
 /////////////////////////// ****************************
