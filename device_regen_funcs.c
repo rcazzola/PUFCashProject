@@ -3265,10 +3265,16 @@ printf("\t\tZeroTrust_Enroll(): Hashing!\n"); fflush(stdout);
          printf("ERROR: ZeroTrust_Enroll(): SHP_ptr->ZHK_A_num_byte %d MUST be EQUAL TO HASH_IN_LEN_BYTES %d == HASH_OUT_LEN_BYTES %d!\n", 
             ZHK_A_num_bytes, HASH_IN_LEN_BYTES, HASH_OUT_LEN_BYTES); exit(EXIT_FAILURE); 
          }
+////////////////////////////
+// NEW CODE - NATASHA - HASH
+////////////////////////////
 
-// Hash it
-      hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
+hash_256(max_string_len, ZHK_A_num_bytes, hash_input, ZHK_A_num_bytes, hash_output);
 
+//////////////////// OLD CODE - NATASHA ///////////////////////
+// // Hash it
+//       hash_256(max_string_len, HASH_IN_LEN_BYTES, hash_input, HASH_OUT_LEN_BYTES, hash_output);
+//////////////////////////////////////////////////////////////////
 #ifdef DEBUG
 PrintHeaderAndHexVals("ZeroTrust_Enroll(): ZHK_A_nonce:\n", ZHK_A_num_bytes, hash_output, 32);
 PrintHeaderAndHexVals("ZeroTrust_Enroll(): Nonce:\n", ZHK_A_num_bytes, nonce, 32);
