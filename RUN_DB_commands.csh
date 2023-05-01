@@ -13,6 +13,8 @@ sqlite3 PUFCash_V3.db < SQLSchemaScripts/SQL_PUFCash_LLK_create_table.sql
 sqlite3 PUFCash_V3.db < SQLSchemaScripts/SQL_PUFCash_WRec_create_table.sql
 sqlite3 PUFCash_V3.db < SQLSchemaScripts/SQL_PUFCash_Account_create_table.sql
 
+
+
 sqlite3 PUFCash_V3_empty.db < SQLSchemaScripts/SQL_PUFCash_LLK_create_table.sql
 sqlite3 PUFCash_V3_empty.db < SQLSchemaScripts/SQL_PUFCash_WRec_create_table.sql
 sqlite3 PUFCash_V3_empty.db < SQLSchemaScripts/SQL_PUFCash_Account_create_table.sql

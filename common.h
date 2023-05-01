@@ -356,7 +356,7 @@ struct transfer
 // =========================
 // PUF-Cash 3.0 Protocol
 
-#define ECT_NUM_BYTES 32
+#define ECT_NUM_BYTES 16
 
 // Size of of the TID that Alice sends to the Bank (through the TTP).
 #define TID_NUM_BYTES (HASH_OUT_LEN_BYTES) 

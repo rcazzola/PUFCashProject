@@ -603,6 +603,7 @@ printf("PUFCashGet_WRec_Data(): CALLED!\n"); fflush(stdout);
       return ID_index_struct.num_ints;
       }
 
+
 // ===============================================
 // Else get num_eCt or the eCt/heCt blobs
    int ret_val = 0;
@@ -629,6 +630,10 @@ printf("PUFCashGet_WRec_Data(): CALLED!\n"); fflush(stdout);
    GetRowResultInt(&row_strings_struct, "PUFCashGet_WRec_Data()", 1, 0, col1_name, num_eCt_ptr);
    FreeStringsDataForRow(&row_strings_struct);
    ret_val = 1;
+   if(get_ids_or_eCt_blobs == 1 )
+   {
+      return 1;
+   }
 
 // Also get the eCt and heCt blobs if requested.
    if ( get_ids_or_eCt_blobs == 2 )
