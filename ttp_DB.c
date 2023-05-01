@@ -436,6 +436,9 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 // ADD CODE 
 // ****************************
 
+   ////////////////////////NATASHA////////////////////////////////
+   decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
+
    //////////////Rachel//////////////////////
    sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
    ////////////////////////////////////////
@@ -487,9 +490,11 @@ else {
 // ADD CODE 
 // ****************************
 
-////////////////Rachel///////////////////////////
+////////////////Natasha///////////////////////////
 unsigned char *eID_amt_plaintext = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 unsigned char *eID_amt_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+encrypt_256(SK_TF, SHP_ptr->AES_IV, Alice_request_str, AES_INPUT_NUM_BYTES, eID_amt_encrypted);
 
 if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
    { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
