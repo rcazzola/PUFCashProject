@@ -104,14 +104,26 @@ unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 //holds unencrypted chip_num and withdrawal amount
 sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
 
+///////////////////////////Aisha/////////////////////////////////
+unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
+encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BYTES, eID_amt);
+
+//   if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
+//      { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+
+   if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+/////////////////////////////////////////////////////////////////
+
+/////////////////////////Old/////////////////////////////////////
 //encrypt that string and store it in eID_amt
 //encrypt_256(Client_CIArr[My_index].AliceBob_shared_key, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, max_string_len, eID_amt);
 
-   if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+//   if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
+//     { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+////////////////////////////////////////////////////////////////
 
-   // if ( SockSendB((unsigned char *)eID_amt, strlen(eID_amt)+1, TTP_socket_desc) < 0 )
-   //    { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
+
 //////////////////////////////////// ****************************
 
 // 2) Get response from TTP on whether Alice has enough funds. If insufficient funds ("ISF"), return 0, else continue.
@@ -142,12 +154,13 @@ sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
       return 0;
       }
 
+   ////////////////////////Old////////////////////////////////
    ////////////////////////////////Rachel/////////////////////
-   if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): ALICE failed to send ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
+   //if ( SockSendB((unsigned char *)SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+   //   { printf("ERROR: AliceWithdrawal(): ALICE failed to send ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
 
 
-   printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);
+   //printf("LLK on ALICE side = %s\n", SHP_ptr->ZeroTrust_LLK);
    ////////////////////////////////////////////////////////////
 
 
@@ -155,6 +168,17 @@ sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
    unsigned char *SK_TA = SHP_ptr->SE_final_key; 
    SHP_ptr->SE_final_key = NULL;
 
+   //////////////////////////////Aisha///////////////////////////////
+   unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
+   memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
+   unsigned char *AliceLLK_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+   //encrypt the LLK
+   encrypt_256(SK_TA, SHP_ptr->AES_IV, AliceLLK, AES_INPUT_NUM_BYTES, AliceLLK_encrypted);
+
+   if ( SockSendB((unsigned char *)AliceLLK_encrypted, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
+   { printf("ERROR: AliceWithdrawal(): ALICE failed to send encrypted ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
+   //////////////////////////////////////////////////////////////////
 
 
 // 4) Get the eeCt and eheCt
@@ -183,8 +207,8 @@ sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
 // ****************************
 
    //////////////////////Rachel////////////////////////
-   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes_adj, eCt_buffer);
-   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes_adj, heCt_buffer);
+   decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes_adj, eCt_buffer);
+   decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes_adj, heCt_buffer);
 
    ///////////////////////////////////////////////////////
 
@@ -201,8 +225,12 @@ sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
 
 
    PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect);
-
-   printf("num_ect we got = %d\n", num_ect);
+   /////////////////////////////Aisha/////////////////////////
+   int cents = num_ect % 100;
+   int dollars = num_ect / 100;
+   printf("Alice Local Account Balance: $%d.%02d\n", dollars, cents);
+   //////////////////////////////////////////////////////////
+   //printf("num_ect we got = %d\n", num_ect);
 
    printf("ADDED num_eCT to DB\n");
 
