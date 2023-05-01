@@ -365,7 +365,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
    int chip_num;
 
    if ( SockGetB((unsigned char *)request_str, max_string_len, Alice_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_chip_num' from Alice!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Error receiving Alice_chip_num from Alice!\n"); exit(EXIT_FAILURE); }
    sscanf(request_str, "%d", &chip_num);
 
 // When Alice makes a withdrawal, her and the TTP carry out ZeroTrust authentication, which means the TTP must have AT
@@ -434,7 +434,7 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
 
 ////////// NATASHA NEW /////////////////////
 if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_anon_chip_num num_eCt' from Alice!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Error receiving encrypted Alice chip number and withdrawel amount !\n"); exit(EXIT_FAILURE); }
 ///////////////////////////////////////////
 
 // 2) Decrypt them
@@ -468,21 +468,22 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) 
 // ****************************
 
 //////////////////AishaNEW///////////////////////
-//if withdrawal is greater than or equal
-printf("NUM_ECT_DB = %d\n", num_eCt_DB);
-if(num_eCt > num_eCt_DB)
+printf("AliceWithdrawal(): Alice Account Balance = %d\n", num_eCt_DB);        //check amount for debugging
+
+
+if(num_eCt > num_eCt_DB)      // sanity checking
 {
    if ( SockSendB((unsigned char *)"ISF", strlen("ISF")+1, Alice_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Failed to send ISF to Alice!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Failed to send ISF Message to Alice!\n"); exit(EXIT_FAILURE); }
 }
+
 else {
    if ( SockSendB((unsigned char *)"HSF", strlen("HSF")+1, Alice_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Failed to send HSF to Alice!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Failed to send HSF Message to Alice!\n"); exit(EXIT_FAILURE); }
 
        do_update = 1;
        update_amt = num_eCt_DB - num_eCt;
 
-      printf("UPDATING HERE\n");
       pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
       PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num_encrypted, &TID_DB, &num_eCt_DB, do_update, update_amt); 
       pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
@@ -500,13 +501,12 @@ else {
 // ****************************
 
    ////////////////Natasha - NEW//////////////////
-   unsigned char *eID_amt_plaintext = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
-   unsigned char *eID_amt_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+   unsigned char *eID_amt_SK_TF= Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);    // this is the eID_amt with SK_TF encryption
 
-   encrypt_256(SK_TF, SHP_ptr->AES_IV, Alice_request_str, AES_INPUT_NUM_BYTES, eID_amt_encrypted);
+   encrypt_256(SK_TF, SHP_ptr->AES_IV, Alice_request_str, AES_INPUT_NUM_BYTES, eID_amt_SK_TF);  //encrypt here
 
-   if ( SockSendB((unsigned char *)eID_amt_encrypted, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eID_amt to BANK\n"); exit(EXIT_FAILURE); }
+   if ( SockSendB((unsigned char *)eID_amt_SK_TF, AES_INPUT_NUM_BYTES, Bank_socket_desc) < 0 )
+      { printf("ERROR: AliceWithdrawal(): TTP failed to send the SK_TF encrypted eID_amt bank\n"); exit(EXIT_FAILURE); }
    //////////////////////////////////////////////
 
 // 7) The Bank and Alice need to generate a session key. Normally Alice contacts the Bank to do this but we cannot
@@ -517,12 +517,10 @@ else {
    ////////////////////////Rachel//////////////////////////////
    unsigned char *LLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
 
-
+   // sanity checking 
    if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get LLK from Alice!\n"); exit(EXIT_FAILURE); }
    
-   printf("LLK on TTP side = %s with ZHK_A_num_bytes = %d\n", LLK, SHP_ptr->ZHK_A_num_bytes);
-
 
    if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): TTP failed to send ZeroTrust_LLK to Bank!\n"); exit(EXIT_FAILURE); }
@@ -530,7 +528,7 @@ else {
 
 // ===============================
 // 8) Get ACK/NAK from Bank
-
+   //sanity checking
    if ( SockGetB((unsigned char *)request_str, max_string_len, Bank_socket_desc) != 4 )
       { printf("ERROR: AliceWithdrawal(): Failed to get 'ACK/NAK' from Bank!\n"); exit(EXIT_FAILURE); }
    
@@ -551,19 +549,12 @@ int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
 unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
-
-printf("num_eCt in TTP = %d\n", num_eCt);
-printf("SIZE OF eCt_tot_bytes = %d\n", eCt_tot_bytes);
-
-//get eeCt and eheCt from bank
-printf("--------WAITING FOR eeCt/eheCT--------\n");
-
+//sanity checking
 if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get 'eeCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
 
 if ( SockGetB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get 'eheCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
-
 
 //send eeCt and eheCt to Alice
 if ( SockSendB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Alice_socket_desc) < 0 )
@@ -571,8 +562,6 @@ if ( SockSendB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Alice_socket_desc) <
 
 if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) < 0 )
    { printf("ERROR: AliceWithdrawal(): TTP failed to send encrypted eheCt_buffer to Alice\n"); exit(EXIT_FAILURE); }
-   
-printf("--------DONE WAITING FOR eeCt/eheCT--------\n");
 
 ////////////////////////////////////////////////////
 

@@ -93,14 +93,14 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
 // ****************************
 
 //////////////Aisha//////////////////////////////////////
-printf("\tAliceWithdrawal(): Alice sending TTP encrypted 'chip_num' and amount of the withdrawal\n"); fflush(stdout);
+printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of withdrawal to TPP\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
 
 // char Alice_chip_num_str_encrypt[max_string_len];
-unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);
-unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);    //encrypted chip num
+unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);                  //encrypted 
 
 //holds unencrypted chip_num and withdrawal amount
 sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
@@ -127,11 +127,11 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BY
 char TTP_Sufficient_Funds_str[max_string_len];
 
 if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Error in Alice receiving sufficient funds from TTP!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Alice receiving sufficient funds from TTP!\n"); exit(EXIT_FAILURE); }
 
    if(strcmp(TTP_Sufficient_Funds_str, "ISF") == 0)
    {
-      printf("-------------------------INSUFFICIENT FUNDS-------------------------\n");
+      printf("ERROR: AliceWithdrawal(): Insufficient Funds\n");
       return 0;
    }
 ////////////////////////////////////////////////////////////////
@@ -143,7 +143,7 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
    int session_or_DA_cobra = 0;
    if ( KEK_SessionKeyGen(max_string_len, SHP_ptr, TTP_socket_desc, session_or_DA_cobra) == 0 )
       {
-      printf("ERROR: AliceWithdrawal(): Failed to generate a Session key with Bank THROUGH THE TTP!\n"); fflush(stdout); 
+      printf("ERROR: AliceWithdrawal(): Failed to generate a Session Key !\n"); fflush(stdout); 
       return 0;
       }
 
@@ -160,7 +160,7 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
    encrypt_256(SK_TA, SHP_ptr->AES_IV, AliceLLK, AES_INPUT_NUM_BYTES, AliceLLK_encrypted);
 
    if ( SockSendB((unsigned char *)AliceLLK_encrypted, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
-   { printf("ERROR: AliceWithdrawal(): ALICE failed to send encrypted ZeroTrust_LLK to TTP!\n"); exit(EXIT_FAILURE); }
+   { printf("ERROR: AliceWithdrawal(): Alice failed to send encrypted LLK to FI!\n"); exit(EXIT_FAILURE); }
    //////////////////////////////////////////////////////////////////
 
 // 4) Get the eeCt and eheCt
@@ -212,9 +212,9 @@ decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes, heCt_buffer);
    PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect );
    int cents = num_ect % 100;
    int dollars = num_ect / 100;
-   printf("Alice Withdrawal Amount: $%d.%02d\n", dollars, cents);
+   printf("AliceWithdrawal(): Alice Withdrawal Amount: $%d.%02d\n", dollars, cents);
 
-   printf("ADDED num_eCT to DB\n");
+   printf("AliceWithdrawal(): Added num_eCT to Database\n");
 
    ///////////////////////////////////////////
 
