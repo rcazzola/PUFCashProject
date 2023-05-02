@@ -105,18 +105,6 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
 // Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
    SAP_ptr->chip_num = Alice_anon_chip_num;
 
-// Sanity check
-// if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
-   if ( Alice_anon_chip_num < 0 )
-      { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
-
-// Sanity check
-   if ( num_eCt < 0 )
-      { printf("ERROR: AliceWithdrawal(): 'num_eCt' is INVALID: %d!\n", num_eCt); exit(EXIT_FAILURE); }
-
-// Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
-   SAP_ptr->chip_num = Alice_anon_chip_num;
-
 ////////////////////////////////////////////////////
 
 
