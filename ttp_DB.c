@@ -153,6 +153,9 @@ printf("AliceTTPBankSessionKeyGen(): CALLED!\n"); fflush(stdout);
    if ( sscanf(request_str, "%d%d%d", &use_database_chlngs, &num_PIs, &num_POs) != 3 )
       { printf("ERROR: AliceTTPBankSessionKeyGen(): Failed to extract 'use_database_chlngs, num_PIs and num_POs' from Bank!\n"); exit(EXIT_FAILURE); }
 
+///////////////// NEW - NATASHA ( pretty sure this is just debugging statement) /////
+printf("use_database_chlngs = %d   num_PIs = %d   num_POs = %d\n", use_database_chlngs, num_PIs, num_POs);
+/////////////////////////////////////////////////////////////////////////////////////
 #ifdef DEBUG
 printf("AliceTTPBankSessionKeyGen(): 'use_database_chlngs' %d\tnum_PIs %d\tnum_POs %d!\n", use_database_chlngs, num_PIs, num_POs); fflush(stdout);
 #endif
@@ -425,23 +428,33 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
 // ADD CODE
-
-////////////////AishaNEW////////////////////////////////////
-   if ( SockGetB((unsigned char *)eID_amt, max_string_len, Alice_socket_desc) < 0 )
+////////// NATASHA NEW /////////////////////
+if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_anon_chip_num num_eCt' from Alice!\n"); exit(EXIT_FAILURE); }
-/////////////////////////////////////****************************
+////////////////////////////////////////////
+
+
+////////////////Aisha OLD////////////////////////////////////
+//    if ( SockGetB((unsigned char *)eID_amt, max_string_len, Alice_socket_desc) < 0 )
+//       { printf("ERROR: AliceWithdrawal(): Error receiving 'Alice_anon_chip_num num_eCt' from Alice!\n"); exit(EXIT_FAILURE); }
+// /////////////////////////////////////****************************
 
 // 2) Decrypt them
 // ****************************
 // ADD CODE 
 // ****************************
 
-   ////////////////////////NATASHA////////////////////////////////
+   ////////////////////////NATASHA - NEW////////////////////////////////
    decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
 
-   //////////////Rachel//////////////////////
-   sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
-   ////////////////////////////////////////
+   sscanf(Alice_request_str, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
+
+   /////////////////////////////// END - NEW ////////////////////////////
+
+
+   // //////////////Rachel- OLD//////////////////////
+   // sscanf(eID_amt, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
+   // ////////////////////////////////////////
 
 // ===============================
 // 3) TTP checks Alice's Bank account and confirms she is allowed to withdraw this amount. NOTE: Use Alice's chip_num
@@ -481,16 +494,19 @@ else {
 /////////////////////////// ****************************
 
 // 5) Start Bank transaction by sending Alice's request amount and chip_num (or anonomous chip_num).
+
    if ( SockSendB((unsigned char *)"WITHDRAW", strlen("WITHDRAW") + 1, Bank_socket_desc) < 0 ) {
       printf("ERROR: AliceWithdrawal(): Failed to send 'WITHDRAW' to Bank!\n"); exit(EXIT_FAILURE);
    }
+
+
 
 // 6) Encrypt eID_amt with SK_TF
 // ****************************
 // ADD CODE 
 // ****************************
 
-////////////////Natasha///////////////////////////
+////////////////Natasha - NEW///////////////////////////
 unsigned char *eID_amt_plaintext = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 unsigned char *eID_amt_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
@@ -510,13 +526,13 @@ if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Bank_socket_desc) 
    unsigned char *LLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
 
 
-  if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
+   if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get LLK from Alice!\n"); exit(EXIT_FAILURE); }
-   
-   printf("LLK on TTP side = %s\n", LLK);
+   ///////////////// NATASHA - NEW /////////////////////
+   printf("LLK on TTP side = %s with ZHK_A_num_bytes = %d\n", LLK, SHP_ptr->ZHK_A_num_bytes);
+   /////////////////////////////////////////////////////
 
-
-    if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
+   if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): TTP failed to send ZeroTrust_LLK to Bank!\n"); exit(EXIT_FAILURE); }
    //////////////////////////////////////////////////////////////
 
