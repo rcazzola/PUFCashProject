@@ -131,9 +131,9 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BY
 // ADD CODE
 
 ////////////////////Aisha_NEW//////////////////////////////
-   char TTP_Sufficient_Funds_str[max_string_len];
+char TTP_Sufficient_Funds_str[max_string_len];
 
-   if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_socket_desc) < 0 )
+if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving sufficient funds from TTP!\n"); exit(EXIT_FAILURE); }
 
    if(strcmp(TTP_Sufficient_Funds_str, "ISF") == 0)
@@ -182,10 +182,14 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BY
 
 
 // 4) Get the eeCt and eheCt
-   int eCt_tot_bytes = num_eCt * SHP_ptr->eCt_num_bytes;
+   // int eCt_tot_bytes = num_eCt * SHP_ptr->eCt_num_bytes;
+   int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
+
    int eCt_tot_bytes_adj = eCt_tot_bytes + AES_INPUT_NUM_BYTES - (eCt_tot_bytes % AES_INPUT_NUM_BYTES);
-   unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
-   unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
+   //unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
+   //unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
+   unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+   unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 // ****************************
 // ADD CODE 
 // ****************************
@@ -201,14 +205,23 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BY
 
 // 5) Decrypt the eCt and heCt with SK_TA.
    unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-   unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
+   unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+
+   //unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes_adj);
 // ****************************
 // ADD CODE 
 // ****************************
-
+   
+   /////////////////////Aisha/////////////////////////
+   decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes, eCt_buffer);
+   decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes, heCt_buffer);
+   ///////////////////////////////////////////////////
+   
+   
+   //////////////////////Old///////////////////////////
    //////////////////////Rachel////////////////////////
-   decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes_adj, eCt_buffer);
-   decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes_adj, heCt_buffer);
+   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eeCt_buffer, eCt_tot_bytes_adj, eCt_buffer);
+   //decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes_adj, heCt_buffer);
 
    ///////////////////////////////////////////////////////
 
