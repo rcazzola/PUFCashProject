@@ -85,10 +85,11 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 ////// ADD CODE - NatashaNEW 
 // ****************************
 if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
-   { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
 
    decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
-   
+
+
    sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);
    printf("eID_amt in BANK = %s\n", Alice_request_str);
 
@@ -97,6 +98,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
 // if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
    if ( Alice_anon_chip_num < 0 )
       { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
+
 
 // Sanity check
    if ( num_eCt < 0 )
