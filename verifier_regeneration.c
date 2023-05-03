@@ -219,7 +219,6 @@ hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buff
 // a good idea to add another blob field to this table that records the SK_TA too and uses that as the unique id, otherwise
 // live with the one withdrawal constraint.
    
-   printf("Adding to database\n");
    pthread_mutex_lock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
    PUFCashAdd_WRec_Data(max_string_len, SAP_ptr->DB_PUFCash_V3, Alice_anon_chip_num, LLK, SAP_ptr->ZHK_A_num_bytes, eCt_buffer, 
       heCt_buffer, eCt_tot_bytes, num_eCt);
