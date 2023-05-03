@@ -212,8 +212,7 @@ decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes, heCt_buffer);
    PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect );
    int cents = num_ect % 100;
    int dollars = num_ect / 100;
-   printf("Alice Local Account Balance: $%d.%02d\n", dollars, cents);
-   // printf("num_ect we got = %d\n", num_ect);
+   printf("Alice Withdrawal Amount: $%d.%02d\n", dollars, cents);
 
    printf("ADDED num_eCT to DB\n");
 
@@ -1502,7 +1501,7 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
                num_eCt_nonce_bytes, num_eCt) == 0 )
                { printf("ERROR: Alice FAILED to withdraw %d eCt\n", num_eCt); fflush(stdout); }
             else
-               { printf("ERROR: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
+               { printf("SUCCESS: Alice SUCCEEDED in withdrawing %d eCt\n", num_eCt); fflush(stdout); }
             break;
 
 
