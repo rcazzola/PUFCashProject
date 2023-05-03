@@ -579,7 +579,136 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 // forwards request to Bank.
 
 
-/////////////////////Aisha////////////////////////////
+// /////////////////////Aisha////////////////////////////
+// void AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int Alice_socket_desc,
+//    pthread_mutex_t *PUFCash_Account_DB_mutex_ptr, pthread_mutex_t *ZeroTrust_AuthenToken_DB_mutex_ptr, 
+//    unsigned char *SK_TF, int min_withdraw_increment, int Bank_socket_desc, int port_number, int num_CIArr, 
+//    ClientInfoStruct *Client_CIArr, int My_TTP_index)
+//    {
+//    char request_str[max_string_len];
+
+// printf("AliceAccount(): BEGIN!\n"); fflush(stdout);
+// #ifdef DEBUG
+// #endif
+
+// // ===============================
+// // ===============================
+// // ZeroTrust Alice-TTP authentication encryption key generation: Start by getting Alice_chip_num so we can get a specific AT 
+// // from the Bank. Also needed to access her Account Table below.
+// int chip_num;
+
+// printf("AliceAccount(): Getting chip_num from Alice so we can fetch an AT for Alice from the Bank!\n"); fflush(stdout); 
+// #ifdef DEBUG
+// #endif
+//    if ( SockGetB((unsigned char *)request_str, max_string_len, Alice_socket_desc) < 0 )
+//       { printf("ERROR: AliceAccount(): Error receiving 'Alice_chip_num' from Alice!\n"); exit(EXIT_FAILURE); }
+//    sscanf(request_str, "%d", &chip_num);
+
+// // When Alice makes a withdrawal, her and the TTP carry out ZeroTrust authentication, which means the TTP must have AT
+// // for the customers. The TTP created AT at startup with the IA, so when customer's request AT, they get the TTP ATs.
+// // But the TTP has NOT yet fetched AT for the customers (it is NOT menu driver like Alice and Bob where Alice and Bob
+// // explicitly get AT using a menu option). Get an AT for Alice from the Bank.
+
+// printf("AliceAccount(): TTP getting AT for Alice's chip_num %d!\n", chip_num); fflush(stdout); 
+// #ifdef DEBUG
+// #endif
+
+// // Add an AT for Alice.
+//     int is_TTP = 1;
+//     ZeroTrust_GetATs(MAX_STRING_LEN, SHP_ptr, Bank_socket_desc, is_TTP, SK_TF, ZeroTrust_AuthenToken_DB_mutex_ptr, chip_num);
+
+// // ZeroTrust: Authentication and session key generation. Alice and Bob determine if each has an AT for the other (set local_AT_status 
+// // and remote_AT_status) and then get each others chip IDs. 
+//    int local_AT_status, remote_AT_status, Alice_chip_num, I_am_Alice; 
+
+// printf("AliceAccount(): TTP carrying out ZeroTrust protocol with Alice (chip_num %d)!\n", chip_num); fflush(stdout); 
+// #ifdef DEBUG
+// #endif
+   
+//    I_am_Alice = 0;
+//    Alice_chip_num = ExchangeIDsConfirmATExists(max_string_len, SHP_ptr, SHP_ptr->chip_num, port_number, I_am_Alice, Alice_socket_desc, 
+//       &local_AT_status, &remote_AT_status);
+
+// // Sanity check
+//    if ( chip_num != Alice_chip_num )
+//       { 
+//       printf("ERROR: AliceAccount(): chip_num sent by Alice to get AT %d differs from chip_num returned by 'ExchangeIDs...' %d\n",
+//          chip_num, Alice_chip_num); exit(EXIT_FAILURE);
+//       }
+
+// // Return FAILURE if both Alice and Bob do NOT have ATs for each other.
+//    if ( remote_AT_status == -1 || local_AT_status == -1 )
+//       {
+//       printf("WARNING: AliceAccount(): Alice does NOT have an AT for the TTP: remote_AT_status is 0 => %d!\n", remote_AT_status); fflush(stdout);
+//       return; 
+//       }
+
+// printf("AliceAccount(): Exchange ID's completed successfully with Alice's chip_num %d!\n", Alice_chip_num); fflush(stdout);
+// #ifdef DEBUG
+// #endif
+
+// // Sanity checks.
+//    if ( num_CIArr != 1 || My_TTP_index != 0 )
+//       { printf("ERROR: AliceAccount(): The number of CIArr is NOT 1 (%d) OR My_TTP_index is not 0 (%d)!\n", num_CIArr, My_TTP_index); exit(EXIT_FAILURE); }
+
+// // Now generate a shared key. Assume Alice and TTP have ATs on each other. Exchange the nonces in the ATs, hash them with 
+// // the ZeroTrust_LLKs to create two ZHK_A_nonces, XOR them for the shared key. The shared key is stored in the Client_CIArr 
+// // for the follow-up transaction.
+//    I_am_Alice = 0;
+//    if ( ZeroTrustGenSharedKey(max_string_len, SHP_ptr, Alice_chip_num, Alice_socket_desc, I_am_Alice, num_CIArr, Client_CIArr, My_TTP_index) == 1 )
+//       { printf("TTP SUCCEEDED in authenticating Alice and generating a shared key!\n"); fflush(stdout); }
+//    else
+//       { 
+//       printf("TTP FAILED in authenticating Alice and generating a shared key!\n"); fflush(stdout); 
+//       return;
+//       }
+
+// // Get Alice-TTP shared key for ZeroTrust.
+//    unsigned char *SK_FA = Client_CIArr[My_TTP_index].AliceBob_shared_key;
+//    Client_CIArr[My_TTP_index].AliceBob_shared_key = NULL;
+
+// // Sanity check.
+//    if ( SK_FA == NULL )
+//       { printf("ERROR: AliceAccount(): SK_FA from ZeroTrust authen/key gen is NULL!\n"); exit(EXIT_FAILURE); }
+
+
+// int TID = 0;
+// int num_eCt = 0;
+
+
+// // Only allow one record to exist for each customer at this point.
+//       if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, 
+//          &num_eCt, 0, 0) == 0 ) {
+
+//          return;
+//       }
+
+
+// printf("Account Data Retrieved with TID = %d and Amount = %d\n", TID, num_eCt); fflush(stdout);
+
+// char num_eCt_str[max_string_len];
+// sprintf(num_eCt_str, "%d", num_eCt);
+
+// if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket_desc) < 0 )
+//       { printf("ERROR: Failed to send data from FI to Alice\n"); }
+// else { 
+//    printf("SUCCESS: Sent data from FI to Alice\n");
+//    int amount;
+//    sscanf(num_eCt_str, "%d", &amount);
+//    int cents = amount % 100;
+//    int dollars = amount / 100;
+//    printf("Account Balance: $%d.%02d\n", dollars, cents);
+//    // printf("Account Balance: %s\n", num_eCt_str);
+// }
+
+// printf("AliceAccount(): DONE!\n"); fflush(stdout);
+// #ifdef DEBUG
+// #endif
+
+//    return;
+//    }
+
+/////////////////////Aisha/////////////////////////////
 void AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int Alice_socket_desc,
    pthread_mutex_t *PUFCash_Account_DB_mutex_ptr, pthread_mutex_t *ZeroTrust_AuthenToken_DB_mutex_ptr, 
    unsigned char *SK_TF, int min_withdraw_increment, int Bank_socket_desc, int port_number, int num_CIArr, 
@@ -671,10 +800,8 @@ printf("AliceAccount(): Exchange ID's completed successfully with Alice's chip_n
    if ( SK_FA == NULL )
       { printf("ERROR: AliceAccount(): SK_FA from ZeroTrust authen/key gen is NULL!\n"); exit(EXIT_FAILURE); }
 
-
 int TID = 0;
 int num_eCt = 0;
-
 
 // Only allow one record to exist for each customer at this point.
       if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, 
