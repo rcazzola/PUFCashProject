@@ -661,7 +661,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       return 0;
       }
 
-   ////////////////OUR CODE STARTS///////////////////////////
+   ////////////////OUR CODE STARTS/////////////////////////// NATASHA, AISHA, RACHEL 
 
    int dummy;
    int num_eCt = 0;
