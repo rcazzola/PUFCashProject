@@ -99,7 +99,6 @@ printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of wi
 #ifdef DEBUG
 #endif
 
-
 // char Alice_chip_num_str_encrypt[max_string_len];
 unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);    //encrypted chip num
 unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);                  //encrypted 
@@ -843,7 +842,7 @@ printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
 
    return 1;
    }
-   
+
 // ====================================== Alice Transfer Done ============================================
 
 // ========================================================================================================
