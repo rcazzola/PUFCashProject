@@ -36,6 +36,8 @@ int AliceDoZeroTrust(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, Clien
 // ========================================================================================================
 // Alice authenticates with the TTP and then carries out the withdrawal. 
 
+// ================================= Alice Withdrawal Begin ================================================
+
 int AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
    int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
    int num_eCt_nonce_bytes, int num_eCt)
@@ -226,9 +228,11 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
 
    return 1;
    }
+// ================================= Alice Withdrawal Done ===============================================
 
 
 
+// ================================= Alice Account Begin =================================================
 ////////////////////Aisha///////////////////////////////////////////////
 int AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
    int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
@@ -327,7 +331,7 @@ printf("\nAliceAccount(): DONE\n\n"); fflush(stdout);
    }
 ///////////////////////////////////////////////////////////////////////
 
-
+// ====================================== Alice Account Done =============================================
 
 // ========================================================================================================
 // ========================================================================================================
@@ -609,6 +613,8 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
 // we use AliceDoZeroTrust to do authentication between Alice and Bob AND between Alice and the TTP 
 // (during withdrawals). Created this 'Driver' to modularize the removal of these elements.
 
+// =========================================== Alice Transfer Begin ========================================
+
 int AliceTransferDriver(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int My_index, int Bob_index, 
    ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, int amount)
 // int num_eCt_nonce_bytes, int num_eCt) 
@@ -745,6 +751,8 @@ printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
    return 1;
    }
 
+
+// ====================================== Alice Transfer Done ============================================
 
 // ========================================================================================================
 // ========================================================================================================
