@@ -91,7 +91,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
 
 
    sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);
-   printf("eID_amt in BANK = %s\n", Alice_request_str);
+   // printf("eID_amt in BANK = %s\n", Alice_request_str);
    // sscanf(eID_amt, "%d %d", &Alice_anon_chip_num, &num_eCt);
 
 
@@ -191,12 +191,12 @@ decrypt_256(SK_TA, SAP_ptr->AES_IV, eLLK, SAP_ptr->ZHK_A_num_bytes, LLK);
 // ****************************
 // ADD CODE
 // ****************************
-printf("num_eCt in BANK = %d\n", num_eCt);
-printf("eCT_tot_bytes = %d\n", eCt_tot_bytes);
+// printf("num_eCt in BANK = %d\n", num_eCt);
+// printf("eCT_tot_bytes = %d\n", eCt_tot_bytes);
 // printf("LLK total bytes = %d\n", SAP_ptr->ZHK_A_num_bytes);
 int LLK_index = 0;
-unsigned char *new_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-memcpy(new_eCt_buffer, eCt_buffer, eCt_tot_bytes);
+unsigned char *new_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+// memcpy(new_eCt_buffer, eCt_buffer, eCt_tot_bytes);
 
 for(int i = 0; i < eCt_tot_bytes; i++)
 {
@@ -208,21 +208,23 @@ for(int i = 0; i < eCt_tot_bytes; i++)
       LLK_index = 0;
    }
 }
-printf("Done XORing\n");
-   hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
-printf("DOne hashing\n");
+   memcpy(new_heCt_buffer, heCt_buffer, eCt_tot_bytes);
+
+// printf("Done XORing\n");
+   hash_256(max_string_len, eCt_tot_bytes, new_heCt_buffer, eCt_tot_bytes, heCt_buffer);
+// printf("DOne hashing\n");
 // 7) Store the eCt in the PUFCash_WRec.db as one big blob. NOTE: Multiple outstanding withdrawals is NOT supported 
 // right now because the LLK is used as a unique identifier in the PUFCash_WRec table of the PUFCash database (database
 // scheme sets this is 'unique' which prevents duplicates. And Alice uses the same LLK for each successive withdrawal.
 // But we must record the LLK to do the validation of the heCt later during deposits so it must be used. Might be
 // a good idea to add another blob field to this table that records the SK_TA too and uses that as the unique id, otherwise
 // live with the one withdrawal constraint.
-   printf("Adding to database\n");
+   // printf("Adding to database\n");
    pthread_mutex_lock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
    PUFCashAdd_WRec_Data(max_string_len, SAP_ptr->DB_PUFCash_V3, Alice_anon_chip_num, LLK, SAP_ptr->ZHK_A_num_bytes, eCt_buffer, 
       heCt_buffer, eCt_tot_bytes, num_eCt);
    pthread_mutex_unlock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
-   printf("Done adding to database\n");
+   // printf("Done adding to database\n");
 
 
 // 8) Encrypt eCt and heCt with SK_TA to eeCt and eheCt
@@ -247,7 +249,7 @@ encrypt_256(SK_TA, SAP_ptr->AES_IV, heCt_buffer, eCt_tot_bytes, eheCt_buffer);
 //       { printf("ERROR: AliceWithdrawal(): Bank failed to send 'eheCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
 
 
-printf("----------BANK SENDING encrypted eCT and eheCT buffers to TTP-----------\n");
+// printf("----------BANK SENDING encrypted eCT and eheCT buffers to TTP-----------\n");
  if ( SockSendB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Bank failed to send encrypted 'eeCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
  if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )

@@ -1,4 +1,5 @@
 # Location of ARM toolchain. NOTE: Using 2017.4 makes this work with EITHER ZYBO or CORA
+# SDK_PATH = /home/sadman/opt/Xilinx/SDK/2017.2
 SDK_PATH = /home/sadman/opt/Xilinx/SDK/2017.2
 ARM_TOOLS_PATH = $(SDK_PATH)/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin
 

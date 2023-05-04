@@ -551,8 +551,9 @@ printf("PUFCashAdd_WRec_Data(): BEGIN!\n"); fflush(stdout);
    if ( WRec_id == -1 )
       { printf("ERROR: PUFCashAdd_WRec_Data(): Alice's eCt NOT FOUND -- JUST ADDED IT -- IMPOSSIBLE!\n"); exit(EXIT_FAILURE); }
 
-printf("PUFCashAdd_WRec_Data(): DONE: Added WRec index %d\tnum_eCt %d\teCt_tot_bytes %d\n", 
-   WRec_id, num_eCt, eCt_tot_bytes); fflush(stdout);
+// printf("PUFCashAdd_WRec_Data(): DONE: Added WRec index %d\tnum_eCt %d\teCt_tot_bytes %d\n", 
+   // WRec_id, num_eCt, eCt_tot_bytes); 
+   fflush(stdout);
 #ifdef DEBUG
 #endif
 

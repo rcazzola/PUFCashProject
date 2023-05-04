@@ -461,7 +461,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) 
 // ADD CODE 
 // ****************************
 //if withdrawal is greater than or equal
-printf("NUM_ECT_DB = %d\n", num_eCt_DB);
+// printf("NUM_ECT_DB = %d\n", num_eCt_DB);
 if(num_eCt > num_eCt_DB)
 {
    if ( SockSendB((unsigned char *)"ISF", strlen("ISF")+1, Alice_socket_desc) < 0 )
@@ -474,7 +474,7 @@ if(num_eCt > num_eCt_DB)
        do_update = 1;
        update_amt = num_eCt_DB - num_eCt;
 
-      printf("UPDATING HERE\n");
+      // printf("UPDATING HERE\n");
       pthread_mutex_lock(PUFCash_Account_DB_mutex_ptr);
       PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num_encrypted, &TID_DB, &num_eCt_DB, do_update, update_amt); 
       pthread_mutex_unlock(PUFCash_Account_DB_mutex_ptr);
@@ -521,7 +521,7 @@ if(num_eCt > num_eCt_DB)
   if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get LLK from Alice!\n"); exit(EXIT_FAILURE); }
    
-   printf("LLK on TTP side = %s with ZHK_A_num_bytes = %d\n", LLK, SHP_ptr->ZHK_A_num_bytes);
+   // printf("LLK on TTP side = %s with ZHK_A_num_bytes = %d\n", LLK, SHP_ptr->ZHK_A_num_bytes);
 
 
     if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
@@ -551,8 +551,8 @@ unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
 
-printf("num_eCt in TTP = %d\n", num_eCt);
-printf("SIZE OF eCt_tot_bytes = %d\n", eCt_tot_bytes);
+// printf("num_eCt in TTP = %d\n", num_eCt);
+// printf("SIZE OF eCt_tot_bytes = %d\n", eCt_tot_bytes);
 //get eeCt and eheCt from bank
    printf("--------WAITING FOR eeCt/eheCT--------\n");
 
