@@ -1638,6 +1638,23 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
 ////////////////////////////////////////////////////////
 
 
+///////////////////Rachel/////////////////////////
+// ======================================
+// ======================================
+// Alice deposit
+/*         case MENU_DEPOSIT:
+
+            get_deposit();
+
+            if ( AliceDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
+               deposit_success(xxxx unsigned int amount);
+            else
+               deposit_fail();
+            break;
+*/
+////////////////////////////////////////////////////////
+
+
 // ======================================
 // ======================================
 // Contact IA (the Bank) to get a list of ATs that it stores, one unique AT that corresponds to each customer.
