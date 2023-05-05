@@ -769,21 +769,21 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       encrypt_256(SK_FA, SHP_ptr->AES_IV, Bob_eCt_buffer, AES_INPUT_NUM_BYTES, Bob_eCt_buffer_encrypted);
       encrypt_256(SK_FA, SHP_ptr->AES_IV, Bob_heCt_buffer, AES_INPUT_NUM_BYTES, Bob_heCt_buffer_encrypted);
 
-      printf("----------Alice SENDING encrypted eCT and eheCT buffers to Bob-----------\n");
+      printf("Alice sending encrypted eCT and eheCT to Bob\n");
       if ( SockSendB((unsigned char *)Bob_eCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'eCt_buffer' to Bob!\n"); }
       if ( SockSendB((unsigned char *)Bob_heCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
 
       if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Rem_eCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes, (num_eCt - amount))) {
-         printf("Database has been updated.\n");
+         printf("AliceTransferDriver(): Database has been updated.\n");
       }
       else {
-         printf("Database has not been updated");
+         printf("AliceTransferDriver(): Database has not been updated");
       }
    }
    else {
-      printf("ERROR: AliceTransferDriver(): Not enough local balance. Available balance: %d\n", num_eCt);
+      printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: %d\n", num_eCt);
    }
 
 
