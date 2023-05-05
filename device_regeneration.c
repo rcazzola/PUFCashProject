@@ -612,7 +612,7 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
       int bob_cents = amount % 100;
       int bob_dollars = amount/ 100;
    
-      printf("Amount Received by Bob: %d.%02d\n", bob_dollars, bob_cents);
+      printf("Amount Received by Bob: $%d.%02d\n", bob_dollars, bob_cents);
       
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
 
