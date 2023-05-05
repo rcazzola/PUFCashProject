@@ -1625,9 +1625,9 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
 // Alice deposit
          case MENU_DEPOSIT:
 
-            print("\nDEPOSIT MENU:\n");
+            printf("\nDEPOSIT MENU:\n");
 
-            // get_deposit();
+            get_deposit();
 
             // if ( BobDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
             //    deposit_success(xxxx unsigned int amount);
