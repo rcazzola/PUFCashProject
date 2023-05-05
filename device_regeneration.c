@@ -728,7 +728,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
          { printf("ERROR: AliceTransferDriver(): Alice failed to send transfer amount to Bob!\n"); exit(EXIT_FAILURE); }
 
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
-      int rem_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
+      int Alice_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
 
       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
@@ -738,23 +738,23 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       
-      unsigned char *Rem_eCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
-      unsigned char *Rem_heCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
+      unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
       memcpy(Bob_eCt_buffer, eCt_buffer, eCt_tot_bytes);
       memcpy(Bob_heCt_buffer, heCt_buffer, eCt_tot_bytes);
-      memcpy(Rem_eCt_buffer, (eCt_buffer + (eCt_tot_bytes)), rem_eCt_tot_bytes);
-      memcpy(Rem_heCt_buffer, (heCt_buffer + (eCt_tot_bytes)), rem_eCt_tot_bytes);
+      memcpy(Alice_eCt_buffer, (eCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
+      memcpy(Alice_heCt_buffer, (heCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
 
       unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
-      unsigned char *new_rem_heCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
+      unsigned char *Updated_Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
       memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
 
       int LLK_index = 0;
-      for(int i = 0; i < rem_eCt_tot_bytes; i++)
+      for(int i = 0; i < Alice_eCt_tot_bytes; i++)
       {
-         Rem_heCt_buffer[i] = Rem_eCt_buffer[i] ^ AliceLLK[LLK_index];
+         Alice_heCt_buffer[i] = Alice_eCt_buffer[i] ^ AliceLLK[LLK_index];
          LLK_index++;
          if(LLK_index >= SHP_ptr->ZHK_A_num_bytes)
          {
@@ -762,9 +762,9 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
          }
       }
 
-      memcpy(new_rem_heCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes);
+      memcpy(Updated_Alice_heCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes);
 
-      hash_256(max_string_len, eCt_tot_bytes, new_rem_heCt_buffer, eCt_tot_bytes, Rem_heCt_buffer);
+      hash_256(max_string_len, eCt_tot_bytes, Updated_Alice_heCt_buffer, eCt_tot_bytes, Alice_heCt_buffer);
 
       unsigned char *Bob_eCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
       unsigned char *Bob_heCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
@@ -778,7 +778,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       if ( SockSendB((unsigned char *)Bob_heCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
 
-      if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Rem_eCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes, (num_eCt - amount))) {
+      if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Alice_eCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes, (num_eCt - amount))) {
          printf("AliceTransferDriver(): Database has been updated.\n");
       }
       else {
