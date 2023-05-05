@@ -785,8 +785,13 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
          printf("AliceTransferDriver(): Database has not been updated");
       }
    }
+   
    else {
-      printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: %d\n", num_eCt);
+      int cents = amount % 100;
+      int dollars = amount / 100;
+      printf("\tDeposited $%d.%02d\n", dollars, cents);
+      printf("\tReturning to the main menu.\n\n");
+      printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", dollars, cents);
       exit(EXIT_FAILURE); 
    }
 
