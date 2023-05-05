@@ -787,6 +787,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    }
    else {
       printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: %d\n", num_eCt);
+      exit(EXIT_FAILURE); 
    }
 
 
@@ -1618,19 +1619,22 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
 
 
 ///////////////////Rachel/////////////////////////
+////////////////// NATASHA //////////////////////
 // ======================================
 // ======================================
 // Alice deposit
-/*         case MENU_DEPOSIT:
+         case MENU_DEPOSIT:
 
-            get_deposit();
+            print("\nDEPOSIT MENU:\n");
 
-            if ( BobDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
-               deposit_success(xxxx unsigned int amount);
-            else
-               deposit_fail();
+            // get_deposit();
+
+            // if ( BobDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
+            //    deposit_success(xxxx unsigned int amount);
+            // else
+            //    deposit_fail();
             break;
-*/
+
 ////////////////////////////////////////////////////////
 
 
