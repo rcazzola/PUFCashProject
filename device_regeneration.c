@@ -705,7 +705,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    int dummy;
    int num_eCt = 0;
    if (!PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_eCt)) {
-      printf("ERROR: AliceTransferDriver(): No database record available.\n");
+      printf("ERROR: AliceTransferDriver(): No record in database found.\n");
       close(Bob_socket_desc);
       return 0;
    }
@@ -722,7 +722,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
 
          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
-         { printf("ERROR: AliceTransferDriver(): Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
+         { printf("ERROR: AliceTransferDriver(): Alice failed to send transfer amount to Bob!\n"); exit(EXIT_FAILURE); }
 
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
       int rem_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
@@ -775,12 +775,11 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       if ( SockSendB((unsigned char *)Bob_heCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
 
-
       if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Rem_eCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes, (num_eCt - amount))) {
-         printf("Database updated.\n");
+         printf("Database has been updated.\n");
       }
       else {
-         printf("Database not updated");
+         printf("Database has not been updated");
       }
    }
    else {
@@ -1623,7 +1622,7 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
 
             get_deposit();
 
-            if ( AliceDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
+            if ( BobDeposit(MAX_STRING_LEN, &SHP, My_index, Bob_index, Client_CIArr, port_number, num_CIArr, trn.amount) == 1 )
                deposit_success(xxxx unsigned int amount);
             else
                deposit_fail();
