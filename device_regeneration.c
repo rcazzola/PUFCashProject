@@ -722,7 +722,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
 
          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
-         { printf("ERROR: AliceTransferDriver: Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
+         { printf("ERROR: AliceTransferDriver(): Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
 
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
       int rem_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
