@@ -705,7 +705,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    int dummy;
    int num_eCt = 0;
    if (!PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_eCt)) {
-      printf("ERROR: AliceTransfer(): No database record available.\n");
+      printf("ERROR: AliceTransferDriver(): No database record available.\n");
       close(Bob_socket_desc);
       return 0;
    }
@@ -718,34 +718,25 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
       unsigned char *amount_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
-      // encrypt the amount
+      // Encrypt amount
       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
 
          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
-         { printf("ERROR: AliceTransfer: Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
+         { printf("ERROR: AliceTransferDriver: Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
 
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
       int rem_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
 
       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+
       PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 2, &dummy, 1, &eCt_buffer, &heCt_buffer, &num_eCt); 
-      // printf("num_eCt: %d\n",num_eCt);
-      // printf("eCt_buffer: %s\n",eCt_buffer);
-      // unsigned char *new_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-
-      // memcpy(new_eCt_buffer, eCt_buffer, eCt_tot_bytes);
-      // hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
-
+      
       unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      
       unsigned char *Rem_eCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
       unsigned char *Rem_heCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
-
-      // unsigned char Bob_eCt_buffer[eCt_tot_bytes];
-      // unsigned char Bob_heCt_buffer[eCt_tot_bytes];
-      // unsigned char Rem_eCt_buffer[rem_eCt_tot_bytes];
-      // unsigned char Rem_heCt_buffer[rem_eCt_tot_bytes];
 
       memcpy(Bob_eCt_buffer, eCt_buffer, eCt_tot_bytes);
       memcpy(Bob_heCt_buffer, heCt_buffer, eCt_tot_bytes);
@@ -753,16 +744,14 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       memcpy(Rem_heCt_buffer, (heCt_buffer + (eCt_tot_bytes)), rem_eCt_tot_bytes);
 
       unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
-      memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
-
       unsigned char *new_rem_heCt_buffer = Allocate1DUnsignedChar(rem_eCt_tot_bytes);
-      // memcpy(new_eCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes);
+
+      memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
 
       int LLK_index = 0;
       for(int i = 0; i < rem_eCt_tot_bytes; i++)
       {
          Rem_heCt_buffer[i] = Rem_eCt_buffer[i] ^ AliceLLK[LLK_index];
-         // eCt_buffer[i] ^ LLK[LLK_index];
          LLK_index++;
          if(LLK_index >= SHP_ptr->ZHK_A_num_bytes)
          {
@@ -774,14 +763,6 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
 
       hash_256(max_string_len, eCt_tot_bytes, new_rem_heCt_buffer, eCt_tot_bytes, Rem_heCt_buffer);
 
-
-      // printf("----------Alice SENDING non-encrypted eCT and eheCT buffers to Bob-----------\n");
-      // if ( SockSendB((unsigned char *)Bob_eCt_buffer, eCt_tot_bytes, Bob_socket_desc) < 0 )
-      //       { printf("ERROR: AliceTransfer(): Alice failed to send 'eCt_buffer' to Bob!\n"); }
-      // if ( SockSendB((unsigned char *)Bob_heCt_buffer, eCt_tot_bytes, Bob_socket_desc) < 0 )
-      //       { printf("ERROR: AliceTransfer(): Alice failed to send 'heCt_buffer' to Bob!\n"); }
-
-
       unsigned char *Bob_eCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
       unsigned char *Bob_heCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
@@ -790,9 +771,9 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
 
       printf("----------Alice SENDING encrypted eCT and eheCT buffers to Bob-----------\n");
       if ( SockSendB((unsigned char *)Bob_eCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
-            { printf("ERROR: AliceTransfer(): Alice failed to send encrypted 'eCt_buffer' to Bob!\n"); }
+            { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'eCt_buffer' to Bob!\n"); }
       if ( SockSendB((unsigned char *)Bob_heCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
-            { printf("ERROR: AliceTransfer(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
+            { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
 
 
       if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Rem_eCt_buffer, Rem_heCt_buffer, rem_eCt_tot_bytes, (num_eCt - amount))) {
@@ -803,7 +784,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       }
    }
    else {
-      printf("ERROR: AliceTransfer(): Not enough local balance. Available balance: %d\n", num_eCt);
+      printf("ERROR: AliceTransferDriver(): Not enough local balance. Available balance: %d\n", num_eCt);
    }
 
 
