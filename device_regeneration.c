@@ -714,15 +714,11 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       char amount_str[max_string_len];
       sprintf(amount_str, "%d", amount);
 
-      // if ( SockSendB((unsigned char *)amount_str, max_string_len, Bob_socket_desc) < 0 )
-      //    { printf("ERROR: AliceTransfer: Alice failed to send 'amount' to Bob!\n"); exit(EXIT_FAILURE); }
-
-      // Alice-Bob Shared Key
+      // Alice and Bob Shared Key
       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
-
       unsigned char *amount_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
-      // encrypt the amount and store it in amount_encrypted
+      // encrypt the amount
       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
 
          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
