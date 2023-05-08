@@ -82,7 +82,7 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    int Alice_anon_chip_num; 
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
-// ADD CODE
+// ADD CODE 
 // ****************************
 
 //////////////////////Natasha//////////////////////////
