@@ -729,8 +729,8 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
 
       PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 2, &dummy, 1, &eCt_buffer, &heCt_buffer, &num_eCt); 
       
-      unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-      unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      //unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      //unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       
       //unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
       //unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
