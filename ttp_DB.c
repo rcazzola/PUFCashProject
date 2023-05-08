@@ -631,7 +631,7 @@ printf("ClientAccount(): Exchange of ID's has been performed successfully with c
 
 /*// Sanity check
    if ( num_CIArr != 1 || My_TTP_index != 0 )
-      { printf("ERROR: AliceAccount(): The number of CIArr is NOT 1 (%d) OR My_TTP_index is not 0 (%d)!\n", num_CIArr, My_TTP_index); exit(EXIT_FAILURE); }
+      { printf("ERROR: ClientAccount(): The number of CIArr is NOT 1 (%d) OR My_TTP_index is not 0 (%d)!\n", num_CIArr, My_TTP_index); exit(EXIT_FAILURE); }
 */
 
 // Generate a shared key. The shared key is stored in the Client_CIArr for next transaction.
