@@ -101,7 +101,11 @@ printf("\tAliceWithdrawal(): Alice sending FI 'chip_num' so FI can decide if it 
 unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);
 unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);  
 
-printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of withdrawal to FI\n"); fflush(stdout);          
+printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of withdrawal to FI\n"); fflush(stdout); 
+
+#ifdef DEBUG
+#endif
+
 sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
 unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
 encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BYTES, eID_amt);
@@ -644,7 +648,6 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
 
 int AliceTransferDriver(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int My_index, int Bob_index, 
    ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, int amount)
-// int num_eCt_nonce_bytes, int num_eCt) 
    {
    int Bob_socket_desc = -1;
 
