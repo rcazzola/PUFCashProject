@@ -415,7 +415,6 @@ void AliceWithdrawal(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int A
       return;
       }
       
-
 // Get Alice-TTP shared key for ZeroTrust.
    unsigned char *SK_FA = Client_CIArr[My_TTP_index].AliceBob_shared_key;
    Client_CIArr[My_TTP_index].AliceBob_shared_key = NULL;
