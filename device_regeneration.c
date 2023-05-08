@@ -787,6 +787,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    }
    
    else {
+      //NATASHA//set
       // available amount
       int a_cents = num_eCt % 100;        
       int a_dollars = num_eCt/ 100;
