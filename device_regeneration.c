@@ -73,7 +73,7 @@ printf("\nAliceWithdrawal(): BEGIN\n\n"); fflush(stdout);
 // Alice sends TTP her chip number. TTP uses this to fetch an AT from the Bank for Alice's transaction. 
 // NOTE: Unlike Alice and Bob, the TTP does NOT fetch AT in advance (Alice and Bob do it with a menu option).
 
-printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if it has an AT for Alice!\n"); fflush(stdout);
+printf("\tAliceWithdrawal(): Alice sending FI 'chip_num' so FI can decide if it has an AT for Alice!\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
@@ -88,30 +88,23 @@ printf("\tAliceWithdrawal(): Alice sending TTP 'chip_num' so TTP can decide if i
       return 0;
 
 
-// 1) Send encrypted Alice chip_num (or anon_chip_num), e.g., SHP_ptr->anon_chip_num and amount of the withdrawal to the TTP. 
+// 1) Send encrypted Alice chip_num (or anon_chip_num), e.g., SHP_ptr->anon_chip_num and amount of the withdrawal to the . 
 // NOTE: Alice gets this anon_chip_num from the Bank (TI) at startup via an anonymous authentication operation. 
 // ****************************
 // ADD CODE 
 // ****************************
 
-//////////////Aisha//////////////////////////////////////
-printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of withdrawal to TPP\n"); fflush(stdout);
-#ifdef DEBUG
-#endif
+/////////////////////////////////Aisha//////////////////////////////////////
 
-// char Alice_chip_num_str_encrypt[max_string_len];
-unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);    //encrypted chip num
-unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);                  //encrypted 
+// Using the session key Alice will encrypt chip_num and num_eCT (eID_amt)
 
-//holds unencrypted chip_num and withdrawal amount
+unsigned char *Alice_chip_num_str_encrypt = Allocate1DUnsignedChar(max_string_len);
+unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);  
+
+printf("AliceWithdrawal(): Alice sending her encrypted chip_num and amount of withdrawal to FI\n"); fflush(stdout);          
 sprintf(Alice_chip_num_str_encrypt, "%d %d", SHP_ptr->chip_num, num_eCt);
-
-//encrypt that string and store it in eID_amt
 unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
 encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BYTES, eID_amt);
-
-   // if ( SockSendB((unsigned char *)Alice_chip_num_str_encrypt, strlen(Alice_chip_num_str_encrypt)+1, TTP_socket_desc) < 0 )
-   //    { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
 
    if ( SockSendB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to send 'eID_amt' to TTP!\n"); exit(EXIT_FAILURE); }
@@ -124,11 +117,11 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, Alice_chip_num_str_encrypt, AES_INPUT_NUM_BY
 // ADD CODE 
 // ****************************
 
-////////////////////Aisha/////////////////////////////
+///////////////////////////Aisha/////////////////////////////
 char TTP_Sufficient_Funds_str[max_string_len];
 
 if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Alice receiving sufficient funds from TTP!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Failed\n"); exit(EXIT_FAILURE); }
 
    if(strcmp(TTP_Sufficient_Funds_str, "ISF") == 0)
    {
@@ -141,6 +134,7 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
 // anonymous) DB to construct the key. To generate a shared secret with the Bank, we just run KEK_SessionKey here, 
 // which causes the device to run KEK. Here, the Bank generates challenge and receives the XHD from Alice. Note we do 
 // NOT need to store this challenge in our PUFCash_LKK DB since it is a session key. 
+
    int session_or_DA_cobra = 0;
    if ( KEK_SessionKeyGen(max_string_len, SHP_ptr, TTP_socket_desc, session_or_DA_cobra) == 0 )
       {
@@ -153,15 +147,17 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
    SHP_ptr->SE_final_key = NULL;
 
    //////////////////////////////Aisha///////////////////////////////
+   
    unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
    memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
    unsigned char *AliceLLK_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
-   //encrypt the LLK
+   //encrypt the LLK with SK_TA
    encrypt_256(SK_TA, SHP_ptr->AES_IV, AliceLLK, AES_INPUT_NUM_BYTES, AliceLLK_encrypted);
 
    if ( SockSendB((unsigned char *)AliceLLK_encrypted, SHP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
    { printf("ERROR: AliceWithdrawal(): Alice failed to send encrypted LLK to FI!\n"); exit(EXIT_FAILURE); }
+   
    //////////////////////////////////////////////////////////////////
 
 // 4) Get the eeCt and eheCt
@@ -169,6 +165,7 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
    int eCt_tot_bytes_adj = eCt_tot_bytes + AES_INPUT_NUM_BYTES - (eCt_tot_bytes % AES_INPUT_NUM_BYTES);
    unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
    unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+   
 // ****************************
 // ADD CODE 
 // ****************************
@@ -182,8 +179,10 @@ if ( SockGetB((unsigned char *)TTP_Sufficient_Funds_str, max_string_len, TTP_soc
    ///////////////////////////////////////////////////////
 
 // 5) Decrypt the eCt and heCt with SK_TA.
+
    unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
    unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+   
 // ****************************
 // ADD CODE 
 // ****************************
@@ -198,9 +197,6 @@ decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes, heCt_buffer);
 // right now because the LLK is used as a unique identifier in the PUFCash_WRec table of the PUFCash database (database
 // scheme sets this is 'unique' which prevents duplicates. And Alice uses the same LLK for each successive withdrawal.
 
-   // PUFCashAdd_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, SHP_ptr->ZeroTrust_LLK, 
-   //    SHP_ptr->KEK_LLK_num_bytes, eeCt_buffer, eheCt_buffer, eCt_tot_bytes, num_eCt);
-
    PUFCashAdd_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, SHP_ptr->ZeroTrust_LLK, 
       SHP_ptr->KEK_LLK_num_bytes, eCt_buffer, heCt_buffer, eCt_tot_bytes, num_eCt);
 
@@ -208,7 +204,6 @@ decrypt_256(SK_TA, SHP_ptr->AES_IV, eheCt_buffer, eCt_tot_bytes, heCt_buffer);
    ///////////////////Rachel/////////////////////
    int num_ect = 0;
    int dummy;
-
 
    PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect );
    int cents = num_ect % 100;
