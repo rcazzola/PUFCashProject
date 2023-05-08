@@ -231,78 +231,76 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
 
 
 
-// ================================= Alice Account Begin =================================================
+// ================================= Client Account Begin =================================================
+
 ////////////////////Aisha///////////////////////////////////////////////
-int AliceAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
+//To check client's balance in their account at FI. 
+
+int ClientAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
    int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
    int num_eCt_nonce_bytes, int num_eCt)
    {
    int TTP_socket_desc;
 
-printf("\nAliceAccount(): BEGIN\n\n"); fflush(stdout);
+printf("\nClientAccount(): BEGIN\n\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
 // Sanity check
-   if ( num_eCt == 0 )
-      { printf("ERROR: AliceAccount(): num_eCt account request is 0!\n"); return 0; }
+//   if ( num_eCt == 0 )
+//      { printf("ERROR: ClientAccount(): num_eCt account request is 0!\n"); return 0; }
 
-// AliceWithdrawal authenticates with the TTP using ZeroTrust for a withdrawal. Open socket to TTP. Keep trying 
-// until TTP gets to a point where he is listening. With polling, this should happen right away.
+// ClientAccount authenticates with the FI using ZeroTrust. Open socket to FI. Keep trying 
+// until FI gets to a point where he is listening. With polling, this should happen right away.
+
    int num_retries = 0;
    while ( OpenSocketClient(max_string_len, Client_CIArr[TTP_index].IP, port_number, &TTP_socket_desc) < 0 )
       { 
-      printf("INFO: AliceAccount(): Alice trying to connect to Bob to exchange IDs!\n"); fflush(stdout); 
+      printf("INFO: ClientAccount(): Client trying to connect to FI to exchange IDs!\n"); fflush(stdout); 
       usleep(500000); 
       num_retries++;
       if ( num_retries > 500 )
          return 0;
       }
+      
+   if ( SockSendB((unsigned char *)"CLIENT-ACCOUNT", strlen("CLIENT-ACCOUNT") + 1, TTP_socket_desc) < 0 )
+      { printf("ERROR: ClientAccount(): Failed"); exit(EXIT_FAILURE); }
 
-// ==============================
-// Tell TTP we want to make a withdrawal. This will start the authentication process before the withdrawal.
-   if ( SockSendB((unsigned char *)"ALICE-ACCOUNT", strlen("ALICE-ACCOUNT") + 1, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceAccount(): Failed to send 'WITHDRAW' to TTP!\n"); exit(EXIT_FAILURE); }
-
-
-// ==============================
-// Alice sends TTP her chip number. TTP uses this to fetch an AT from the Bank for Alice's transaction. 
+// Client sends FI their chip number. FI uses this to fetch an AT from the Bank for the client's transaction. 
 // NOTE: Unlike Alice and Bob, the TTP does NOT fetch AT in advance (Alice and Bob do it with a menu option).
 
-printf("AliceAccount(): Alice sending TTP 'chip_num' so TTP can decide if it has an AT for Alice!\n"); fflush(stdout);
+printf("ClientAccount(): Client sending FI 'chip_num' so FI can decide if it has an AT for the Client!\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
    char Alice_chip_num_str[max_string_len];
    sprintf(Alice_chip_num_str, "%d", SHP_ptr->chip_num);
    if ( SockSendB((unsigned char *)Alice_chip_num_str, strlen(Alice_chip_num_str)+1, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceAccount(): Failed to send 'Alice_chip_num' to TTP!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: ClientAccount(): Failed to send chip number to FI!\n"); exit(EXIT_FAILURE); }
 
-// ==============================
-// Do ZeroTrust authentication and key generation between Alice and the TTP.
+// Do ZeroTrust authentication and key generation between Alice and the FI.
    if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, TTP_index, port_number, TTP_socket_desc, My_index) == 0 )
       return 0;
 
-// ===============================
-
-//Receiving account details CODE
 
 char num_eCt_str[max_string_len];
 
 if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceAccount(): Failed to receive data from FI to Alice\n"); }
+      { printf("ERROR: ClientAccount(): Failed to send account details from FI to client\n"); }
 else { 
-   printf("SUCCESS: AliceAccount(): Received account details from FI to Alice\n");
+   printf("SUCCESS: ClientAccount(): Client received account details from FI\n");
    int amount;
    sscanf(num_eCt_str, "%d", &amount);
    int cents = amount % 100;
    int dollars = amount / 100;
-   // printf("Alice Account Balance: $%d.%02d\n", dollars, cents);  //moving this statement
+   // printf("Client Account Balance: $%d.%02d\n", dollars, cents);  //moving this statement
 
 }
-   // Natasha //
-   // Alice's local balance 
+   //////////////////////////////////// Natasha ////////////////////////////////////////////
+   // Client's local balance aka the eCTs the client has
+   
    int num_ect_local = 0;
+   int amount;
    int dummy;
 
    PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect_local);
@@ -310,26 +308,23 @@ else {
    // printf("Available Balance after Withdrawing:\n");
    int n_cents = num_ect_local % 100;
    int n_dollars = num_ect_local / 100;
-   printf("Alice's Withdrawal Amount: $%d.%02d\n", n_dollars, n_cents);
-// NATASHA //
-   int amount;
+   printf("Client's Withdrawal Amount: $%d.%02d\n", n_dollars, n_cents);
+   
+   ///////////////////////////////// NATASHA /////////////////////////////////////////////
    sscanf(num_eCt_str, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
-   printf("Alice Account Balance: $%d.%02d\n", a_dollars, a_cents); 
-
-
-
+   printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
    close(TTP_socket_desc);
 
-printf("\nAliceAccount(): DONE\n\n"); fflush(stdout);
+printf("\nClientAccount(): DONE\n\n"); fflush(stdout);
 #ifdef DEBUG
 #endif
 
    return 1;
    }
 ///////////////////////////////////////////////////////////////////////
-// ====================================== Alice Account Done =============================================
+// ====================================== Client Account Done =============================================
 
 
 
@@ -792,6 +787,16 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       printf("\tDeposited $%d.%02d\n", dollars, cents);
       printf("\tReturning to the main menu.\n\n");
       printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", dollars, cents);
+      //NATASHA//set
+      // available amount
+      int a_cents = num_eCt % 100;        
+      int a_dollars = num_eCt/ 100;
+      // requested amount
+      int r_cents = amount % 100;
+      int r_dollars = amount/ 100;
+      
+      printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", a_dollars, a_cents);
+      printf("ERROR: AliceTransferDriver(): The amount that was requested: $%d.%02d\n", r_dollars, r_cents);
       exit(EXIT_FAILURE); 
    }
 
@@ -1603,17 +1608,15 @@ printf("\tWITHDRAWAL AMOUNT %d\n", num_eCt); fflush(stdout);
 
 
 ///////////////////Aisha/////////////////////////
-// ======================================
-// ======================================
-// Alice gets account details from TTP_DB.elf
+// Create a menu for ClientAccount
+// Client gets account details from FI
          case MENU_ACCOUNT:
 
 #ifdef DEBUG
-printf("\tALICE ACCOUNT\n"); fflush(stdout); 
+printf("\tClient ACCOUNT\n"); fflush(stdout); 
 #endif
 
-// Alice authenticates with the TTP and then carries out the withdrawal. 
-            if ( AliceAccount(MAX_STRING_LEN, &SHP, TTP_index, My_index, Client_CIArr, port_number, num_CIArr, 
+            if ( ClientAccount(MAX_STRING_LEN, &SHP, TTP_index, My_index, Client_CIArr, port_number, num_CIArr, 
                num_eCt_nonce_bytes, num_eCt) == 0 )
                { printf("ERROR: FAILED to show account details.\n"); fflush(stdout); }
             else
