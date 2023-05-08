@@ -344,7 +344,7 @@ printf("AliceTTPBankSessionKeyGen(): DONE!\n"); fflush(stdout);
    return;
    }
 
-/*
+
 // ========================================================================================================
 // ========================================================================================================
 // Alice withdrawal operation. Alice authenticates and generates session key with TTP using zero trust. 
@@ -566,11 +566,11 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 
    return;
    }
-   */
+   
 
 
 
-
+/*
 // ========================================================================================================
 // ========================================================================================================
 // Alice withdrawal operation. Alice authenticates and generates session key with TTP using zero trust. 
@@ -793,7 +793,7 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 
    return;
    }
-
+*/
 
 
 
