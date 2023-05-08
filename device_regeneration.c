@@ -787,6 +787,11 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
    }
    
    else {
+      int cents = amount % 100;
+      int dollars = amount / 100;
+      printf("\tDeposited $%d.%02d\n", dollars, cents);
+      printf("\tReturning to the main menu.\n\n");
+      printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", dollars, cents);
       //NATASHA//set
       // available amount
       int a_cents = num_eCt % 100;        
@@ -1628,8 +1633,8 @@ printf("\tALICE ACCOUNT\n"); fflush(stdout);
 ////////////////////////////////////////////////////////
 
 
-///////////////////Rachel/////////////////////////
-////////////////// NATASHA //////////////////////
+
+////////////////// Rachel, Natasha //////////////////////
 // ======================================
 // ======================================
 // Alice deposit
