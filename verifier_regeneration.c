@@ -86,9 +86,10 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
 // ****************************
 
 //////////////////////Natasha//////////////////////////
+decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
 sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);  // get the amount Alice is requesting & chip num
 printf("Alice withdrawing %s from Bank\n", Alice_request_str);       // print amount Alice is requesting
-decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
+// decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
 
 // start sanity checks ( JIMS STUFF)
 // if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
