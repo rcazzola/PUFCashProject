@@ -469,7 +469,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) 
 // check amount for debugging
 printf("AliceWithdrawal(): Alice Account Balance = %d\n", num_eCt_DB);        
 
-// sanity check
+// FI checks if Alice has HSF
 if(num_eCt > num_eCt_DB)      
 {
    if ( SockSendB((unsigned char *)"ISF", strlen("ISF")+1, Alice_socket_desc) < 0 )
