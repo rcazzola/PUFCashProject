@@ -579,7 +579,7 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 // Client then sends the amount they withdrew and the FI maintains their bank account and checks the balance. FI then 
 // forwards the request to the bank.
 
-/////////////////////Rachel/////////////////////////////
+//////////////////////////////////////Rachel//////////////////////////////////////
 void ClientAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int Alice_socket_desc,
    pthread_mutex_t *PUFCash_Account_DB_mutex_ptr, pthread_mutex_t *ZeroTrust_AuthenToken_DB_mutex_ptr, 
    unsigned char *SK_TF, int min_withdraw_increment, int Bank_socket_desc, int port_number, int num_CIArr, 
@@ -653,7 +653,7 @@ printf("ClientAccount(): Exchange of ID's has been performed successfully with c
 
 printf("Account Data Retrieved with TID: %d, Amount: %d\n", TID, num_eCt); fflush(stdout);
 sprintf(num_eCt_str, "%d", num_eCt);
-
+  
 // Retrieve account details
 if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket_desc) < 0 )
       { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); }
@@ -666,6 +666,14 @@ else {
    printf("Client's Account Balance: $%d.%02d\n", dollars, cents);
 }
 
+/////////////////////////////////Aisha///////////////////////////////////////
+// unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+// encrypt_256(SK_FA, SHP_ptr->AES_IV, num_eCt_str, AES_INPUT_NUM_BYTES, balance_encrypted);
+/* if ( SockSendB((unsigned char *)balance_encrypted, strlen(balance_encrypted)+1, Alice_socket_desc) < 0 )
+      { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); }
+*/  
+//////////////////////////////////////////////////////////////////////////////
+   
 printf("ClientAccount(): DONE!\n"); fflush(stdout);
 
    return;
