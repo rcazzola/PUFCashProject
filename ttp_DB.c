@@ -346,7 +346,7 @@ printf("AliceTTPBankSessionKeyGen(): DONE!\n"); fflush(stdout);
 
 
 
-// ========================================================================================================
+// ====================================== ALICE WITHDRAWAL BEGIN ==========================================
 // ========================================================================================================
 // Alice withdrawal operation. Alice authenticates and generates session key with TTP using zero trust. 
 // She sends her withdrawal amount. TTP maintains Bank account and checks her balance. If okay, TTP 
@@ -569,12 +569,11 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 
    return;
    }
+// ==================================== ALICE WITHDRAWAL END =============================================
 
 
 
-
-///////////////////////Client Account///////////////////////////////
-// ========================================================================================================
+// ===================================== CLIENT ACCOUNT BEGIN =============================================
 // ========================================================================================================
 // This is the function for Client Account. Client authenticates and generates a SK with FI using zero trust. 
 // Client then sends the amount they withdrew and the FI maintains their bank account and checks the balance. FI then 
@@ -674,7 +673,7 @@ printf("ClientAccount(): DONE!\n"); fflush(stdout);
 //////////////////////////////////////////////
 
 
-// ========================================================================================================
+// ===================================== CLIENT ACCOUNT DONE ==============================================
 // ========================================================================================================
 // TTP thread.
 
