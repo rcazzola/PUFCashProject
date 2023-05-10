@@ -82,45 +82,37 @@ void AliceWithdrawal(int max_string_len, SRFAlgoParamsStruct *SAP_ptr, int TTP_s
    int Alice_anon_chip_num; 
    unsigned char *eID_amt = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 // ****************************
-////// ADD CODE - NatashaNEW 
+// ADD CODE
 // ****************************
+
+//////////////////////Rachel//////////////////////////
+// SOCKETGETB = receive 'eID_amt'
 if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
-   { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
-
+      { printf("ERROR: AliceWithdrawal(): Error receiving eID_amt from TTP!\n"); exit(EXIT_FAILURE); }
+   
+   //decrypting here
    decrypt_256(SK_TF, SAP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
-   sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt);
-   printf("eID_amt in BANK = %s\n", Alice_request_str);
+   sscanf(Alice_request_str, "%d %d", &Alice_anon_chip_num, &num_eCt); //get the amount for alice chip num and the num of ect requested
+   printf("Alice withdrawing %s from Bank\n", Alice_request_str); // amount alice is requesting print out
 
 
-// Sanity check
-// if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
-   if ( Alice_anon_chip_num < 0 )
+// JIMS STUFF
+  if ( Alice_anon_chip_num < 0 )
       { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
 
-// Sanity check
-   if ( num_eCt < 0 )
+      if ( num_eCt < 0 )
       { printf("ERROR: AliceWithdrawal(): 'num_eCt' is INVALID: %d!\n", num_eCt); exit(EXIT_FAILURE); }
+   
 
-// Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
+//Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
    SAP_ptr->chip_num = Alice_anon_chip_num;
 
-// Sanity check
-//   if ( Alice_anon_chip_num < 0 || Alice_anon_chip_num >  SAP_ptr->num_chips )
-   if ( Alice_anon_chip_num < 0 )
-      { printf("ERROR: AliceWithdrawal(): 'Alice_anon_chip_num' is INVALID: %d!\n", Alice_anon_chip_num); exit(EXIT_FAILURE); }
 
-// Sanity check
-   if ( num_eCt < 0 )
-      { printf("ERROR: AliceWithdrawal(): 'num_eCt' is INVALID: %d!\n", num_eCt); exit(EXIT_FAILURE); }
-
-// Set the chip_num parameter of SAP_ptr before calling KEK_SessionKeyGen.
-   SAP_ptr->chip_num = Alice_anon_chip_num;
-
-////////////////////////////////////////////////////
-
+/////////////////////////////////////////
 
 // 2) Session Key with Alice THROUGH the TTP using the anonymous DB. 
 // First send control information that the verifier is using to the TTP.
+
    sprintf(request_str, "%d %d %d", SAP_ptr->use_database_chlngs, SAP_ptr->num_PIs, SAP_ptr->num_POs);
    if ( SockSendB((unsigned char *)request_str, strlen(request_str)+1, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to send 'use_database_chlngs/num_PIs/num_POs' to TTP!\n"); exit(EXIT_FAILURE); }
@@ -129,7 +121,6 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
    int fail_or_succeed;
    if ( (fail_or_succeed = KEK_SessionKeyGen(max_string_len, SAP_ptr, TTP_socket_desc, RANDOM)) == 0 )
       { printf("WARNING: AliceWithdrawal(): Failed to generate a Session Key between Alice and the Bank THROUGH THE TTP!\n"); fflush(stdout); }
-
 // Free up the vectors.
    if ( SAP_ptr->database_NAT != NULL )
       {
@@ -163,7 +154,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
    unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
    unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
-// Generate requested number of eCt, encrypt them and send them to TTP. Currently each are 16 bytes.
+   // Generate requested number of eCt, encrypt them and send them to TTP. Currently each are 16 bytes.
    if ( read(RANDOM, eCt_buffer, eCt_tot_bytes) == -1 )
       { printf("ERROR: AliceWithdrawal(): Read /dev/urandom failed for eCt generation!\n"); exit(EXIT_FAILURE); }
 
@@ -173,55 +164,56 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
 // ****************************
 // ADD CODE
 // ****************************
-   //////////////////Rachel/////////////////////////
-   /*printf("----------BANK RECEIVING Non-Encrypted LLK-----------\n");
-   if ( SockGetB((unsigned char *)LLK, SAP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Error receiving non-encrypted LLK from TTP!\n"); exit(EXIT_FAILURE); }
-   printf("----------BANK GOT Non-encrypted LLK-----------\n");*/
 
-   printf("----------BANK RECEIVING Encrypted LLK-----------\n");
-   if ( SockGetB((unsigned char *)eLLK, SAP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Error receiving non-encrypted LLK from TTP!\n"); exit(EXIT_FAILURE); }
-   //////////////////////////////////////////////////////////////
+//////////////////////Natasha//////////////////////////////
+
+//SOCKET GET B = recieve LLK from ALICE
+if ( SockGetB((unsigned char *)eLLK, SAP_ptr->ZHK_A_num_bytes, TTP_socket_desc) < 0 ) //SOCKETGETB = recieve
+   {printf("ERROR: AliceWithdrawal(): Error receiving the encrypted LLK from TTP!\n"); exit(EXIT_FAILURE); }
+
+printf("AliceWithdrawal(): Receiving Alice encrypted LLK with SK_TA key\n"); // print for our own benefit
+
 
 // 5) Decrypt LLK
 // ****************************
 // ADD CODE
 // ****************************
 
-   //////////Natasha////////////////
-   decrypt_256(SK_TA, SAP_ptr->AES_IV, eLLK, SAP_ptr->ZHK_A_num_bytes, LLK);
+//////////Natasha////////////////////
+printf("AliceWithdrawal(): Decrypting 'LLK'\n"); // print for our own benefit
+decrypt_256(SK_TA, SAP_ptr->AES_IV, eLLK, SAP_ptr->ZHK_A_num_bytes, LLK); //decrypt LLK
+//////////////////////////////////////
 
-   /////////////////////////////////
 
 // 6) Create heCt using Alice's LLK. XOR in Alice's LLK with the each eCt and hash each of them to create the heCt. 
 // ****************************
 // ADD CODE
 // ****************************
-   
-   //////////////////////Rachel/////////////////////
-   printf("num_eCt in BANK = %d\n", num_eCt);
-   printf("eCT_tot_bytes = %d\n", eCt_tot_bytes);
-   // printf("LLK total bytes = %d\n", SAP_ptr->ZHK_A_num_bytes);
-   int LLK_index = 0;
-   unsigned char *new_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-   memcpy(new_eCt_buffer, eCt_buffer, eCt_tot_bytes);
+//////////////////////Natasha///////////////////
+printf("AliceWithdrawal(): Alice requested number of eCt's = %d\n", num_eCt); //printing 
 
-   for(int i = 0; i < eCt_tot_bytes; i++)
+// THIS IS WHERE WE XOR THE LLK WITH eCt and HASH
+int i = 0;     //iterator
+int j = 0;     //iterate through LLK
+unsigned char *eCt_buffer_current = Allocate1DUnsignedChar(eCt_tot_bytes); //ect buffer
+memcpy(eCt_buffer_current, eCt_buffer, eCt_tot_bytes);
+
+//iterate through each index of eCt buff and LLK and XOR them together then = heCt
+for(int i = 0; i < eCt_tot_bytes; i++)
+{
+   heCt_buffer[i] = eCt_buffer[i] ^ LLK[j];     //XOR '^' eCt with LLK == hashed eCt
+   j++;                                         //incriment LLK index
+
+   if(j >= SAP_ptr->ZHK_A_num_bytes)      //IDK what this means      
    {
-      heCt_buffer[i] = eCt_buffer[i] ^ LLK[LLK_index];
-      // eCt_buffer[i] ^ LLK[LLK_index];
-      LLK_index++;
-      if(LLK_index >= SAP_ptr->ZHK_A_num_bytes)
-      {
-         LLK_index = 0;
-      }
+      j = 0;
    }
+}
 
-   printf("Done XORing\n");
-      hash_256(max_string_len, eCt_tot_bytes, new_eCt_buffer, eCt_tot_bytes, heCt_buffer);
-   printf("Done hashing\n");
-   //////////////////////////////////////////////////////////////
+// now that we have heCt XOR'd we will HASH it
+hash_256(max_string_len, eCt_tot_bytes, eCt_buffer_current, eCt_tot_bytes, heCt_buffer);
+
+///////////////////////////////////////
 
 
 // 7) Store the eCt in the PUFCash_WRec.db as one big blob. NOTE: Multiple outstanding withdrawals is NOT supported 
@@ -230,49 +222,44 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 
 // But we must record the LLK to do the validation of the heCt later during deposits so it must be used. Might be
 // a good idea to add another blob field to this table that records the SK_TA too and uses that as the unique id, otherwise
 // live with the one withdrawal constraint.
-   printf("Adding eCT to database\n");
+   
    pthread_mutex_lock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
    PUFCashAdd_WRec_Data(max_string_len, SAP_ptr->DB_PUFCash_V3, Alice_anon_chip_num, LLK, SAP_ptr->ZHK_A_num_bytes, eCt_buffer, 
       heCt_buffer, eCt_tot_bytes, num_eCt);
    pthread_mutex_unlock(SAP_ptr->PUFCash_WRec_DB_mutex_ptr);
-
-   printf("Added eCT to DB\n");
-
+   
+   ////Rachel////
+   printf("AliceWithdrawal(): Added Alice's 'eCT' to DB\n"); //printing 
+ 
 // 8) Encrypt eCt and heCt with SK_TA to eeCt and eheCt
 // ****************************
 // ADD CODE
 // ****************************
 
-////////////////Rachel//////////////////
+////////////////Aisha////////////////
+//eeCt, eheCt -> encrypted declare so we can encrypt later
 unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-
-//////////////Natasha/////////////////////////////
+// we are encrypting them both 
 encrypt_256(SK_TA, SAP_ptr->AES_IV, eCt_buffer, eCt_tot_bytes, eeCt_buffer);
 encrypt_256(SK_TA, SAP_ptr->AES_IV, heCt_buffer, eCt_tot_bytes, eheCt_buffer);
 
-////////////////////////////////////////////
+
 
 // 9) Transmit encrypted eeCt and eheCt to FI
 // ****************************
 // ADD CODE
 // ****************************
-
-/////////////////Rachel//////////////
-/*printf("----------BANK SENDING non-encrypted eCT and eheCT buffers to TTP-----------\n");
- if ( SockSendB((unsigned char *)eCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Bank failed to send 'eeCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
- if ( SockSendB((unsigned char *)heCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Bank failed to send 'eheCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
-*/
-
-//////////////Natasha/////////////////////////////
-printf("----------BANK SENDING encrypted eCT and eheCT buffers to TTP-----------\n");
+////////////////Natasha/////////////
+printf("AliceWithdrawal(): Bank sending encrypted 'eCT' and the 'eheCT' to to FI\n"); // printing
+// SEND eeCt and eheCt
+// SOCK SEND B = send encyrpted eCt to FI
  if ( SockSendB((unsigned char *)eeCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Bank failed to send encrypted 'eeCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): Bank failed to send encrypted 'eeCt_buffer' to FI!\n"); exit(EXIT_FAILURE); }
+ // SOCK SEND B = send encrypted hashed eCt to FI
  if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, TTP_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Bank failed to send encrypted 'eheCt_buffer' to TTP!\n"); exit(EXIT_FAILURE); }
-////////////////////////////////////////
+      { printf("ERROR: AliceWithdrawal(): Bank failed to send encrypted 'eheCt_buffer' to FI!\n"); exit(EXIT_FAILURE); }
+
 
    return;
    }
@@ -2228,4 +2215,3 @@ printf("\tTasking Thread %d\n", thread_num); fflush(stdout);
 
    return 0;
    }
-
