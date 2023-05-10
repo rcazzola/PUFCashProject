@@ -685,9 +685,8 @@ else {
 /////////////////////////////////Aisha///////////////////////////////////////
 unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 encrypt_256(SK_FA, SHP_ptr->AES_IV, num_eCt_str, AES_INPUT_NUM_BYTES, balance_encrypted);
-if ( SockSendB((unsigned char *)balance_encrypted, AES_INPUT_NUM_BYTES, Alice_socket_desc) < 0 )
 
-if ( SockSendB((unsigned char *)balance_encrypted, AES_INPUT_NUM_BYTES, Alice_socket_desc) < 0 )
+if ( SockSendB((unsigned char *)balance_encrypted, max_string_len, Alice_socket_desc) < 0 )
       { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); } 
 //////////////////////////////////////////////////////////////////////////////
    
