@@ -294,6 +294,7 @@ else {
 } */
    
    ///////////////////////////////////////Aisha/////////////////////////////////////////////
+   unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
    unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
    unsigned char *balance_decrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
    if ( SockGetB((unsigned char *)balance_encrypted, strlen(balance_encrypted)+1, TTP_socket_desc) < 0 )
@@ -317,15 +318,16 @@ else {
    int n_dollars = num_ect_local / 100;
    printf("Client's Withdrawal Amount: $%d.%02d\n", n_dollars, n_cents);
    
+   /*
    ///////////////////////////////// NATASHA /////////////////////////////////////////////
    sscanf(num_eCt_str, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
    printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
+   */
    
    // Client's bank balance
    ////////////////////////////////Aisha ////////////////////////////////////////////////
-   int amount;
    sscanf(balance_decrypted, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
