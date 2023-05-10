@@ -765,7 +765,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       memcpy(Alice_eCt_buffer, (eCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
       memcpy(Alice_heCt_buffer, (heCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
       
-      /*
+      
       unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
       unsigned char *Updated_Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
@@ -785,7 +785,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       memcpy(Updated_Alice_heCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes);
 
       hash_256(max_string_len, eCt_tot_bytes, Updated_Alice_heCt_buffer, eCt_tot_bytes, Alice_heCt_buffer);
-      */
+      
 
       unsigned char *Bob_eCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
       unsigned char *Bob_heCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
