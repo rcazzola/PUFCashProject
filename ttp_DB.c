@@ -550,7 +550,7 @@ int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
 unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
-//sanity check
+//getting eeCt and eheCt from bank
 if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get 'eeCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
 
