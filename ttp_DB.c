@@ -571,7 +571,7 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 
 
 /*
-// ========================================================================================================
+// ==================================== ALICE WITHDRAWAL BEGIN ============================================
 // ========================================================================================================
 // Alice withdrawal operation. Alice authenticates and generates session key with TTP using zero trust. 
 // She sends her withdrawal amount. TTP maintains Bank account and checks her balance. If okay, TTP 
@@ -775,7 +775,7 @@ int eCt_tot_bytes = num_eCt * HASH_IN_LEN_BYTES;
 unsigned char *eeCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 unsigned char *eheCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
-//sanity checking
+// Open Socket to receive
 if ( SockGetB((unsigned char *)eeCt_buffer, eCt_tot_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Failed to get 'eeCt_buffer' from Bank!\n"); exit(EXIT_FAILURE); }
 
@@ -795,10 +795,10 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
    }
 */
 
+// ========================================= ALICE WITHDRAWAL DONE =======================================
 
 
-///////////////////////Client Account///////////////////////////////
-// ========================================================================================================
+// ========================================= CLIENT ACCOUNT BEGIN =========================================
 // ========================================================================================================
 // This is the function for Client Account. Alice authenticates and generates a SK with TTP using zero trust. 
 // Alice sends the amount she withdrew and the FI maintains her bank account and checks her balance. FI then 
@@ -893,6 +893,8 @@ printf("ClientAccount(): Exchange of ID's has been performed successfully with c
 printf("Account Data Retrieved with TID: %d, Amount: %d\n", TID, num_eCt); fflush(stdout);
 sprintf(num_eCt_str, "%d", num_eCt);
 
+/*
+//////////////////////////////// Old //////////////////////////////////////////////////
 if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket_desc) < 0 )
       { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); }
 else { 
@@ -903,15 +905,22 @@ else {
    int dollars = amount / 100;
    printf("Client's Account Balance: $%d.%02d\n", dollars, cents);
 }
-
+*/
+   
+/////////////////////////////////Aisha///////////////////////////////////////
+unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+encrypt_256(SK_FA, SHP_ptr->AES_IV, num_eCt_str, AES_INPUT_NUM_BYTES, balance_encrypted);
+if ( SockSendB((unsigned char *)balance_encrypted, strlen(balance_encrypted)+1, Alice_socket_desc) < 0 )
+      { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); } 
+//////////////////////////////////////////////////////////////////////////////
+   
 printf("ClientAccount(): DONE!\n"); fflush(stdout);
 
    return;
    }
-//////////////////////////////////////////////
 
+// ===========================================CLIENT ACCOUNT DONE =========================================
 
-// ========================================================================================================
 // ========================================================================================================
 // TTP thread.
 
