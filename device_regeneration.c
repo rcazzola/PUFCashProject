@@ -601,16 +601,19 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
 // this up with another transaction to Bob here.
       *keep_socket_open_ptr = 0;
       
-      ////////////////////////////////////Aisha/////////////////////////////////////////////////////////////
-      // Bob receives the transferred amount from Alice here.
-      // Bob receives the encrypted amount
-      // Bob receives the encrypted eCT and heCT
+           ////////////////////////////////////Aisha/////////////////////////////////////////////////////////////
+      // Bob receives the transaction from Alice here.
 
       int amount = 0;
-      unsigned char *amount_str = Allocate1DUnsignedChar(max_string_len);
       unsigned char *amount_encrypted = Allocate1DUnsignedChar(max_string_len);
+      unsigned char *amount_str = Allocate1DUnsignedChar(max_string_len);
+      
+      // Alice-Bob Shared Key
       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
 
+//       if ( SockGetB((unsigned char *)amount, max_string_len * 10000, client_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
+      
       if ( SockGetB((unsigned char *)amount_encrypted, max_string_len, client_socket_desc) < 0 )
             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
 
@@ -624,10 +627,11 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
    
       printf("Amount Received by Bob: $%d.%02d\n", bob_dollars, bob_cents);
       
-      // Amount of memory required to store eCTs received by Bob
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
+
       unsigned char *eCt_buffer_encrypted = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer_encrypted = Allocate1DUnsignedChar(eCt_tot_bytes);
+
       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       
@@ -636,7 +640,6 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
       if ( SockGetB((unsigned char *)heCt_buffer_encrypted, eCt_tot_bytes, client_socket_desc) < 0 )
             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
 
-      // decrypting the eCT and heCTs
       decrypt_256(SK_FA, SHP_ptr->AES_IV, eCt_buffer_encrypted, eCt_tot_bytes, eCt_buffer);
       decrypt_256(SK_FA, SHP_ptr->AES_IV, heCt_buffer_encrypted, eCt_tot_bytes, heCt_buffer);
 
@@ -715,11 +718,6 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       }
 
    //////////////////////////////////NATASHA, RACHEL, AISHA//////////////////////////////////////
-   
-   // Alice must withdraw and receive the eCT first before she can transfer
-   // Alice encrypts amount she wants to transfer and sends it to Bob
-   // Alice encrypts the eCTs and heCTs and sends it to Bob
-   
    int dummy;
    int num_eCt = 0;
    if (!PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_eCt)) {
@@ -727,47 +725,34 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       close(Bob_socket_desc);
       return 0;
    }
-   
-   // Transfer request must be less or equal to the eCT Alice has
-      
    if (amount <= num_eCt) {
 
       char amount_str[max_string_len];
       sprintf(amount_str, "%d", amount);
 
-      // Transfer begins with Alice and Bob shared key to encrypt the amount
-      // Alice sends this information so Bob knows how much memory it needs to store the eCTs
-      
+      // Alice and Bob Shared Key
       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
       unsigned char *amount_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 
+      // Encrypt amount
       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
 
          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
          { printf("ERROR: AliceTransferDriver(): Alice failed to send transfer amount to Bob!\n"); exit(EXIT_FAILURE); }
-            
-      // eCTs to be transferred to Bob
+
       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
-      unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-      unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-      
-       // Alices remaining eCT after transferring to Bob
       int Alice_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
-      unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
-      unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
-      
+
       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
 
       PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 2, &dummy, 1, &eCt_buffer, &heCt_buffer, &num_eCt); 
       
-      // eCTs to be transferred to Bob
-      //unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-      //unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       
-      // Alices remaining eCT after transferring to Bob
-      //unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
-      //unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
       memcpy(Bob_eCt_buffer, eCt_buffer, eCt_tot_bytes);
       memcpy(Bob_heCt_buffer, heCt_buffer, eCt_tot_bytes);
@@ -793,8 +778,6 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       memcpy(Updated_Alice_heCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes);
 
       hash_256(max_string_len, eCt_tot_bytes, Updated_Alice_heCt_buffer, eCt_tot_bytes, Alice_heCt_buffer);
-
-      // Alice encrypts eCT and heCT to transfer to Bob
 
       unsigned char *Bob_eCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
       unsigned char *Bob_heCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
@@ -874,6 +857,279 @@ printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
 // ========================================================================================================
 // ========================================================================================================
 // ========================================================================================================
+//       ////////////////////////////////////Aisha/////////////////////////////////////////////////////////////
+//       // Bob receives the transferred amount from Alice here.
+//       // Bob receives the encrypted amount
+//       // Bob receives the encrypted eCT and heCT
+
+//       int amount = 0;
+//       unsigned char *amount_str = Allocate1DUnsignedChar(max_string_len);
+//       unsigned char *amount_encrypted = Allocate1DUnsignedChar(max_string_len);
+//       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
+
+//       if ( SockGetB((unsigned char *)amount_encrypted, max_string_len, client_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
+
+//       // decrypt the amount and store it in amount_encrypted
+//       decrypt_256(SK_FA, SHP_ptr->AES_IV, amount_encrypted, max_string_len, amount_str);
+
+//       sscanf(amount_str, "%d", &amount);
+
+//       int bob_cents = amount % 100;
+//       int bob_dollars = amount/ 100;
+   
+//       printf("Amount Received by Bob: $%d.%02d\n", bob_dollars, bob_cents);
+      
+//       // Amount of memory required to store eCTs received by Bob
+//       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
+//       unsigned char *eCt_buffer_encrypted = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       unsigned char *heCt_buffer_encrypted = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      
+//       if ( SockGetB((unsigned char *)eCt_buffer_encrypted, eCt_tot_bytes, client_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
+//       if ( SockGetB((unsigned char *)heCt_buffer_encrypted, eCt_tot_bytes, client_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransfer(): Error in Bob receiving sufficient funds from Alice!\n"); exit(EXIT_FAILURE); }
+
+//       // decrypting the eCT and heCTs
+//       decrypt_256(SK_FA, SHP_ptr->AES_IV, eCt_buffer_encrypted, eCt_tot_bytes, eCt_buffer);
+//       decrypt_256(SK_FA, SHP_ptr->AES_IV, heCt_buffer_encrypted, eCt_tot_bytes, heCt_buffer);
+
+//       PUFCashAdd_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, SHP_ptr->ZeroTrust_LLK, 
+//       SHP_ptr->KEK_LLK_num_bytes, eCt_buffer, heCt_buffer, eCt_tot_bytes, amount);
+
+//       printf("Bob's Receiving Process Completed.\n");
+      
+//       return;
+//       }
+//    ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//    return;
+//    }
+
+
+// // ========================================================================================================
+// // ========================================================================================================
+// // Driver for AliceTransfer where we authenticate and then carry out the transfer to Bob. 
+// // NOTE: I needed to remove the socket opening and message string sending from AliceDoZeroTrust because
+// // we use AliceDoZeroTrust to do authentication between Alice and Bob AND between Alice and the TTP 
+// // (during withdrawals). Created this 'Driver' to modularize the removal of these elements.
+
+// // =========================================== Alice Transfer Begin ========================================
+
+// int AliceTransferDriver(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int My_index, int Bob_index, 
+//    ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, int amount)
+// // int num_eCt_nonce_bytes, int num_eCt) 
+//    {
+//    int Bob_socket_desc = -1;
+
+// printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
+// #ifdef DEBUG
+// #endif
+ 
+// // Sanity checks. Don't allow Alice to specify herself for the transfer operations
+//    if ( Bob_index == My_index )
+//       { 
+//       printf("ERROR: AliceTransferDriver(): Can NOT specify yourself for the value transfer operation!\n"); 
+//       return 0; 
+//       }
+//    if ( Bob_index < 0 || Bob_index >= num_CIArr )
+//       { 
+//       printf("ERROR: AliceTransferDriver(): Bob's ID must be between 0 and %d\tExcluding myself %d!\n", num_CIArr - 1, My_index); 
+//       return 0; 
+//       }
+
+// // Sanity check
+//    if ( Bob_index == -1 )
+//       { printf("ERROR: AliceTransferDriver(): 'Bob' index INVALID %d!\n", Bob_index); exit(EXIT_FAILURE); }
+
+// // Open socket to Bob. Keep trying until Bob gets to a point where he is listening. With polling, this should happen right away.
+//    int num_retries = 0;
+//    while ( OpenSocketClient(max_string_len, Client_CIArr[Bob_index].IP, port_number, &Bob_socket_desc) < 0 )
+//       { 
+//       printf("INFO: AliceTransferDriver(): Alice trying to connect to Bob to exchange IDs!\n"); fflush(stdout); 
+//       usleep(500000); 
+//       num_retries++;
+//       if ( num_retries > 500 )
+//          exit(EXIT_FAILURE);
+//       }
+
+// // Send the initial transaction request which starts the ZeroTrust authentication process.
+//    if ( SockSendB((unsigned char *)"ALICE-BOB-AUTHENTICATE", strlen("ALICE-BOB-AUTHENTICATE") + 1, Bob_socket_desc) < 0 )
+//       { printf("ERROR: AliceTransferDriver(): Failed to send 'ALICE-BOB-AUTHENTICATE' to Bob!\n"); exit(EXIT_FAILURE); }
+
+// // Alice and Bob must have ATs for each other. If they don't, this fails and nothing more is done. This routine sends an 
+// // ALICE-BOB-AUTHENTICATE message and calls ExchangeIDsConfirmATExists. 
+// // TO_DO: KEEP THE SOCKET OPEN -- tried this but didn't work.
+//    if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, Bob_index, port_number, Bob_socket_desc, 
+//       My_index) == 0 )
+//       {
+//       printf("ERROR: AliceTransferDriver(): Alice FAILED with Zero Trust to authenticate Bob -- Aborting transaction!\n"); 
+//       close(Bob_socket_desc);
+//       return 0;
+//       }
+
+//    //////////////////////////////////NATASHA, RACHEL, AISHA//////////////////////////////////////
+   
+//    // Alice must withdraw and receive the eCT first before she can transfer
+//    // Alice encrypts amount she wants to transfer and sends it to Bob
+//    // Alice encrypts the eCTs and heCTs and sends it to Bob
+   
+//    int dummy;
+//    int num_eCt = 0;
+//    if (!PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_eCt)) {
+//       printf("ERROR: AliceTransferDriver(): No record in database found.\n");
+//       close(Bob_socket_desc);
+//       return 0;
+//    }
+   
+//    // Transfer request must be less or equal to the eCT Alice has
+      
+//    if (amount <= num_eCt) {
+
+//       char amount_str[max_string_len];
+//       sprintf(amount_str, "%d", amount);
+
+//       // Transfer begins with Alice and Bob shared key to encrypt the amount
+//       // Alice sends this information so Bob knows how much memory it needs to store the eCTs
+      
+//       unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
+//       unsigned char *amount_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+//       encrypt_256(SK_FA, SHP_ptr->AES_IV, amount_str, AES_INPUT_NUM_BYTES, amount_encrypted);
+
+//          if ( SockSendB((unsigned char *)amount_encrypted, max_string_len, Bob_socket_desc) < 0 )
+//          { printf("ERROR: AliceTransferDriver(): Alice failed to send transfer amount to Bob!\n"); exit(EXIT_FAILURE); }
+            
+//       // eCTs to be transferred to Bob
+//       int eCt_tot_bytes = amount * HASH_IN_LEN_BYTES;
+//       unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      
+//        // Alices remaining eCT after transferring to Bob
+//       int Alice_eCt_tot_bytes = (num_eCt - amount) * HASH_IN_LEN_BYTES;
+//       unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+//       unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      
+//       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+
+//       PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 2, &dummy, 1, &eCt_buffer, &heCt_buffer, &num_eCt); 
+      
+//       // eCTs to be transferred to Bob
+//       //unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+//       //unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      
+//       // Alices remaining eCT after transferring to Bob
+//       //unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+//       //unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+
+//       memcpy(Bob_eCt_buffer, eCt_buffer, eCt_tot_bytes);
+//       memcpy(Bob_heCt_buffer, heCt_buffer, eCt_tot_bytes);
+//       memcpy(Alice_eCt_buffer, (eCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
+//       memcpy(Alice_heCt_buffer, (heCt_buffer + (eCt_tot_bytes)), Alice_eCt_tot_bytes);
+
+//       unsigned char *AliceLLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
+//       unsigned char *Updated_Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+
+//       memcpy(AliceLLK, SHP_ptr->ZeroTrust_LLK, SHP_ptr->ZHK_A_num_bytes);
+
+//       int LLK_index = 0;
+//       for(int i = 0; i < Alice_eCt_tot_bytes; i++)
+//       {
+//          Alice_heCt_buffer[i] = Alice_eCt_buffer[i] ^ AliceLLK[LLK_index];
+//          LLK_index++;
+//          if(LLK_index >= SHP_ptr->ZHK_A_num_bytes)
+//          {
+//             LLK_index = 0;
+//          }
+//       }
+
+//       memcpy(Updated_Alice_heCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes);
+
+//       hash_256(max_string_len, eCt_tot_bytes, Updated_Alice_heCt_buffer, eCt_tot_bytes, Alice_heCt_buffer);
+
+//       // Alice encrypts eCT and heCT to transfer to Bob
+
+//       unsigned char *Bob_eCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+//       unsigned char *Bob_heCt_buffer_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+
+//       encrypt_256(SK_FA, SHP_ptr->AES_IV, Bob_eCt_buffer, AES_INPUT_NUM_BYTES, Bob_eCt_buffer_encrypted);
+//       encrypt_256(SK_FA, SHP_ptr->AES_IV, Bob_heCt_buffer, AES_INPUT_NUM_BYTES, Bob_heCt_buffer_encrypted);
+
+//       printf("Alice sending encrypted eCT and eheCT to Bob\n");
+//       if ( SockSendB((unsigned char *)Bob_eCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'eCt_buffer' to Bob!\n"); }
+//       if ( SockSendB((unsigned char *)Bob_heCt_buffer_encrypted, eCt_tot_bytes, Bob_socket_desc) < 0 )
+//             { printf("ERROR: AliceTransferDriver(): Alice failed to send encrypted 'heCt_buffer' to Bob!\n"); }
+
+//       if (PUFCashUpdate_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, 1, Alice_eCt_buffer, Alice_heCt_buffer, Alice_eCt_tot_bytes, (num_eCt - amount))) {
+//          printf("AliceTransferDriver(): Database has been updated.\n");
+//       }
+//       else {
+//          printf("AliceTransferDriver(): Database has not been updated");
+//       }
+//    }
+   
+//    else {
+//       int cents = amount % 100;
+//       int dollars = amount / 100;
+//       printf("\tDeposited $%d.%02d\n", dollars, cents);
+//       printf("\tReturning to the main menu.\n\n");
+//       printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", dollars, cents);
+//       //NATASHA//set
+//       // available amount
+//       int a_cents = num_eCt % 100;        
+//       int a_dollars = num_eCt/ 100;
+//       // requested amount
+//       int r_cents = amount % 100;
+//       int r_dollars = amount/ 100;
+      
+//       printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", a_dollars, a_cents);
+//       printf("ERROR: AliceTransferDriver(): The amount that was requested: $%d.%02d\n", r_dollars, r_cents);
+//       exit(EXIT_FAILURE); 
+//    }
+
+
+// ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//    close(Bob_socket_desc);
+
+
+// //   while ( OpenSocketClient(max_string_len, Client_CIArr[Bob_index].IP, port_number, &Bob_socket_desc) < 0 )
+// //      { 
+// //      printf("INFO: AliceTransferDriver(): Alice trying to connect to Bob to exchange IDs!\n"); fflush(stdout); 
+// //      usleep(500000); 
+// //      num_retries++;
+// //      if ( num_retries > 500 )
+// //         exit(EXIT_FAILURE);
+// //      }
+
+// // If Alice doesn't have enough eCash to support her request to pay Bob, return immediately and fail. Also, if Bob's IP doesn't
+// // exist, fail. This routine sends a ALICE-PAY-BOB message to Bob AND ASSUMES Bob_socket connection is STILL OPEN from the call
+// // to AliceDoZeroTrust (FullTrust) operation above.
+// //   int status;
+// //   status = AliceTransfer(max_string_len, SHP_ptr, Bob_index, num_eCt_nonce_bytes, num_eCt, Client_CIArr, My_index, 
+// //      Bob_socket_desc);
+
+// // Close Bob's socket descriptor.
+// //   close(Bob_socket_desc);
+
+
+// printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
+// #ifdef DEBUG
+// #endif
+
+//    return 1;
+//    }
+
+// // ====================================== Alice Transfer Done ============================================
+
+
+// // ========================================================================================================
+// // ========================================================================================================
+// // ========================================================================================================
 SRFHardwareParamsStruct SHP;
 
 int main(int argc, char *argv[])
