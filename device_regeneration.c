@@ -330,7 +330,7 @@ else {
    ////////////////////////////////Aisha ////////////////////////////////////////////////
    balance_decrypted = num_eCt_str;
    
-   sscanf(balance_decrypted, "%d", &amount);
+   sscanf(num_eCt_str, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
    printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
