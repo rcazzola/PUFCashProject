@@ -519,10 +519,11 @@ else {
    ////////////////////////Rachel//////////////////////////////
    unsigned char *LLK = Allocate1DUnsignedChar(SHP_ptr->ZHK_A_num_bytes);
 
-   // open socket to receive  
+   // getting LLK from Alice  
    if ( SockGetB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Alice_socket_desc) < 0 )
-      { printf("ERROR: AliceWithdrawal(): Failed to get the LLK from Alice!\n"); exit(EXIT_FAILURE); }
+      { printf("ERROR: AliceWithdrawal(): FI failed to get the LLK from Alice!\n"); exit(EXIT_FAILURE); }
 
+   // sending LLK to bank
    if ( SockSendB((unsigned char *)LLK, SHP_ptr->ZHK_A_num_bytes, Bank_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): FI failed to send 'ZeroTrust_LLK' to Bank!\n"); exit(EXIT_FAILURE); }
    ////////////////////////////////////////////////////////
@@ -630,10 +631,6 @@ printf("ClientAccount(): FI performing ZeroTrust protocol with client!\n"); fflu
 
 printf("ClientAccount(): Exchange of ID's has been performed successfully with client's chip_num: %d!\n", Alice_chip_num); fflush(stdout);
 
-/*// Sanity check
-   if ( num_CIArr != 1 || My_TTP_index != 0 )
-      { printf("ERROR: ClientAccount(): The number of CIArr is NOT 1 (%d) OR My_TTP_index is not 0 (%d)!\n", num_CIArr, My_TTP_index); exit(EXIT_FAILURE); }
-*/
 
 // Generate a shared key. The shared key is stored in the Client_CIArr for next transaction.
    I_am_Alice = 0;
@@ -653,36 +650,19 @@ printf("ClientAccount(): Exchange of ID's has been performed successfully with c
    unsigned char *SK_FA = Client_CIArr[My_TTP_index].AliceBob_shared_key;
    Client_CIArr[My_TTP_index].AliceBob_shared_key = NULL;
 
-/*// Sanity check.
-   if ( SK_FA == NULL )
-      { printf("ERROR: ClientAccount(): SK_FA from ZeroTrust authen/key gen is NULL!\n"); exit(EXIT_FAILURE); }
-*/
 
 // Only allow one record to exist for each customer.
-      if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, 
-         &num_eCt, 0, 0) == 0 ) {
+   if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, &num_eCt, 0, 0) == 0 ) {
 
-         return;
-      }
+      return;
+   }
 
 printf("Account Data Retrieved with TID: %d, Amount: %d\n", TID, num_eCt); fflush(stdout);
 sprintf(num_eCt_str, "%d", num_eCt);
 
-/*
-//////////////////////////////// Old //////////////////////////////////////////////////
-if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); }
-else { 
-   printf("SUCCESS: ClientAccount(): Sent client account details from FI to Alice\n");
-   int amount;
-   sscanf(num_eCt_str, "%d", &amount);
-   int cents = amount % 100;
-   int dollars = amount / 100;
-   printf("Client's Account Balance: $%d.%02d\n", dollars, cents);
-}
-*/
    
 /////////////////////////////////Aisha///////////////////////////////////////
+//encrypting Client Account details
 unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
 encrypt_256(SK_FA, SHP_ptr->AES_IV, num_eCt_str, AES_INPUT_NUM_BYTES, balance_encrypted);
 
