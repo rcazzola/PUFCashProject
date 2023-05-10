@@ -297,6 +297,7 @@ else {
    unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
    unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
    unsigned char *balance_decrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
+   
    if ( SockGetB((unsigned char *)balance_encrypted, max_string_len, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving balance details from TTP!\n"); exit(EXIT_FAILURE); }
    decrypt_256(SK_FA, SHP_ptr->AES_IV, balance_encrypted, AES_INPUT_NUM_BYTES, balance_decrypted);
@@ -306,7 +307,6 @@ else {
    
    //////////////////////////////////// Natasha ////////////////////////////////////////////
    // Client's local balance aka the eCTs the client has
-   
    int num_ect_local = 0;
    int amount;
    int dummy;
@@ -328,6 +328,8 @@ else {
    
    // Client's bank balance
    ////////////////////////////////Aisha ////////////////////////////////////////////////
+   balance_decrypted = num_eCt_str;
+   
    sscanf(balance_decrypted, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
@@ -814,7 +816,7 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
       printf("\tDeposited $%d.%02d\n", dollars, cents);
       printf("\tReturning to the main menu.\n\n");
       printf("ERROR: AliceTransferDriver(): Insufficient transfer funds. Balance Available: $%d.%02d\n", dollars, cents);
-      //NATASHA//set
+      ////////NATASHA///////
       // available amount
       int a_cents = num_eCt % 100;        
       int a_dollars = num_eCt/ 100;
@@ -840,6 +842,7 @@ printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
    }
 
 // ====================================== Alice Transfer Done ============================================
+
 
 
 // // ========================================================================================================
