@@ -659,8 +659,9 @@ printf("ClientAccount(): Exchange of ID's has been performed successfully with c
 
 printf("Account Data Retrieved with TID: %d, Amount: %d\n", TID, num_eCt); fflush(stdout);
 sprintf(num_eCt_str, "%d", num_eCt);
-
-   
+if ( SockSendB((unsigned char *)num_eCt_str, max_string_len, Alice_socket_desc) < 0 )
+      { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); } 
+/* 
 /////////////////////////////////Aisha///////////////////////////////////////
 //encrypting Client Account details
 unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
@@ -669,7 +670,8 @@ encrypt_256(SK_FA, SHP_ptr->AES_IV, num_eCt_str, AES_INPUT_NUM_BYTES, balance_en
 if ( SockSendB((unsigned char *)balance_encrypted, max_string_len, Alice_socket_desc) < 0 )
       { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); } 
 //////////////////////////////////////////////////////////////////////////////
-   
+*/
+  
 printf("ClientAccount(): DONE!\n"); fflush(stdout);
 
    return;

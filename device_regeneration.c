@@ -279,7 +279,7 @@ printf("ClientAccount(): Client sending FI 'chip_num' so FI can decide if it has
 
 
 char num_eCt_str[max_string_len];
-/*
+
 ////////////////////////////////////// Old ///////////////////////////////////////
 if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 )
       { printf("ERROR: ClientAccount(): Failed to send account details from FI to client\n"); }
@@ -291,8 +291,8 @@ else {
    int dollars = amount / 100;
    // printf("Client Account Balance: $%d.%02d\n", dollars, cents);  //moving this statement
 
-} */
-   
+} 
+/*
    ///////////////////////////////////////Aisha/////////////////////////////////////////////
    unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
    unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
@@ -302,6 +302,7 @@ else {
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving balance details from TTP!\n"); exit(EXIT_FAILURE); }
    decrypt_256(SK_FA, SHP_ptr->AES_IV, balance_encrypted, AES_INPUT_NUM_BYTES, balance_decrypted);
    printf("SUCCESS: ClientAccount(): Client received account details from FI\n");
+   */
    /////////////////////////////////////////////////////////////////////////////////////////
    
    
@@ -318,22 +319,23 @@ else {
    int n_dollars = num_ect_local / 100;
    printf("Client's Total eCt Amount: $%d.%02d\n", n_dollars, n_cents);
    
-   /*
+   
    ///////////////////////////////// NATASHA /////////////////////////////////////////////
    sscanf(num_eCt_str, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
    printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
-   */
+   
    
    // Client's bank balance
+   /*
    ////////////////////////////////Aisha ////////////////////////////////////////////////
-   balance_decrypted = num_eCt_str;
    
-   sscanf(num_eCt_str, "%d", &amount);
+   sscanf(balance_decrypted, "%d", &amount);
    int a_cents = amount % 100;
    int a_dollars = amount / 100;
    printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
+   */
    /////////////////////////////////////////////////////////////////////////////////////
    close(TTP_socket_desc);
 
