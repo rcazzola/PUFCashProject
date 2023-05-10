@@ -204,10 +204,10 @@ for(int i = 0; i < eCt_tot_bytes; i++)
    heCt_buffer[i] = eCt_buffer[i] ^ LLK[j];     //XOR '^' eCt with LLK == hashed eCt
    j++;                                         //incriment LLK index
 
-   // if(j >= SAP_ptr->ZHK_A_num_bytes)      //IDK what this means      
-   // {
-   //    j = 0;
-   // }
+   if(j >= SAP_ptr->ZHK_A_num_bytes)      //IDK what this means      
+   {
+      j = 0;
+   }
 }
 
 // now that we have heCt XOR'd we will HASH it
