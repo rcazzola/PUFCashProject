@@ -443,7 +443,7 @@ if ( SockGetB((unsigned char *)eID_amt, AES_INPUT_NUM_BYTES, Alice_socket_desc) 
 // ****************************
 
    //////////Natasha/////////////////////
-   //perform decryption
+   // perform decryption
    decrypt_256(SK_FA, SHP_ptr->AES_IV, eID_amt, AES_INPUT_NUM_BYTES, (unsigned char *)Alice_request_str);
    sscanf(Alice_request_str, "%d %d", &Alice_chip_num_encrypted, &num_eCt);
    ///////////////////////////////////////////
