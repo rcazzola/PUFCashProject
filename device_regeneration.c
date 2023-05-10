@@ -297,7 +297,7 @@ else {
    unsigned char *SK_FA = Client_CIArr[My_index].AliceBob_shared_key;
    unsigned char *balance_encrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
    unsigned char *balance_decrypted = Allocate1DUnsignedChar(AES_INPUT_NUM_BYTES);
-   if ( SockGetB((unsigned char *)balance_encrypted, strlen(balance_encrypted)+1, TTP_socket_desc) < 0 )
+   if ( SockGetB((unsigned char *)balance_encrypted, AES_INPUT_NUM_BYTES, TTP_socket_desc) < 0 )
       { printf("ERROR: AliceWithdrawal(): Error in Alice receiving balance details from TTP!\n"); exit(EXIT_FAILURE); }
    decrypt_256(SK_FA, SHP_ptr->AES_IV, balance_encrypted, AES_INPUT_NUM_BYTES, balance_decrypted);
    printf("SUCCESS: ClientAccount(): Client received account details from FI\n");
