@@ -656,14 +656,16 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
    }
 
 
+
+
+// =========================================== Alice Transfer Begin ========================================
+
 // ========================================================================================================
 // ========================================================================================================
 // Driver for AliceTransfer where we authenticate and then carry out the transfer to Bob. 
 // NOTE: I needed to remove the socket opening and message string sending from AliceDoZeroTrust because
 // we use AliceDoZeroTrust to do authentication between Alice and Bob AND between Alice and the TTP 
 // (during withdrawals). Created this 'Driver' to modularize the removal of these elements.
-
-// =========================================== Alice Transfer Begin ========================================
 
 int AliceTransferDriver(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int My_index, int Bob_index, 
    ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, int amount)
@@ -834,6 +836,8 @@ printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
    }
 
 // ====================================== Alice Transfer Done ============================================
+
+
 
 
 // ========================================================================================================
