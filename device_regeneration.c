@@ -225,7 +225,7 @@ printf("\nAliceWithdrawal(): DONE\n\n"); fflush(stdout);
 // ================================= Alice Withdrawal Done ===============================================
 
 
-/*
+
 // ================================= Client Account Begin =================================================
 
 ////////////////////Aisha///////////////////////////////////////////////
@@ -305,7 +305,7 @@ else {
    */
    /////////////////////////////////////////////////////////////////////////////////////////
    
-   /*
+   
    //////////////////////////////////// Natasha ////////////////////////////////////////////
    // Client's local balance aka the eCTs the client has
    int num_ect_local = 0;
@@ -337,102 +337,6 @@ else {
    printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
    */
    /////////////////////////////////////////////////////////////////////////////////////
-   /*close(TTP_socket_desc);
-
-printf("\nClientAccount(): DONE\n\n"); fflush(stdout);
-#ifdef DEBUG
-#endif
-
-   return 1;
-   }*/
-///////////////////////////////////////////////////////////////////////
-// ====================================== Client Account Done =============================================
-
-
-// ================================= Client Account Begin =================================================
-
-////////////////////Aisha///////////////////////////////////////////////
-//To check client's balance in their account at FI. 
-
-int ClientAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int TTP_index, 
-   int My_index, ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, 
-   int num_eCt_nonce_bytes, int num_eCt)
-   {
-   int TTP_socket_desc;
-
-printf("\nClientAccount(): BEGIN\n\n"); fflush(stdout);
-#ifdef DEBUG
-#endif
-
-// Sanity check
-//   if ( num_eCt == 0 )
-//      { printf("ERROR: ClientAccount(): num_eCt account request is 0!\n"); return 0; }
-
-// ClientAccount authenticates with the FI using ZeroTrust. Open socket to FI. Keep trying 
-// until FI gets to a point where he is listening. With polling, this should happen right away.
-
-   int num_retries = 0;
-   while ( OpenSocketClient(max_string_len, Client_CIArr[TTP_index].IP, port_number, &TTP_socket_desc) < 0 )
-      { 
-      printf("INFO: ClientAccount(): Client trying to connect to FI to exchange IDs!\n"); fflush(stdout); 
-      usleep(500000); 
-      num_retries++;
-      if ( num_retries > 500 )
-         return 0;
-      }
-      
-   if ( SockSendB((unsigned char *)"CLIENT-ACCOUNT", strlen("CLIENT-ACCOUNT") + 1, TTP_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Failed"); exit(EXIT_FAILURE); }
-
-// Client sends FI their chip number. FI uses this to fetch an AT from the Bank for the client's transaction. 
-// NOTE: Unlike Alice and Bob, the TTP does NOT fetch AT in advance (Alice and Bob do it with a menu option).
-
-printf("ClientAccount(): Client sending FI 'chip_num' so FI can decide if it has an AT for the Client!\n"); fflush(stdout);
-#ifdef DEBUG
-#endif
-
-   char Alice_chip_num_str[max_string_len];
-   sprintf(Alice_chip_num_str, "%d", SHP_ptr->chip_num);
-   if ( SockSendB((unsigned char *)Alice_chip_num_str, strlen(Alice_chip_num_str)+1, TTP_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Failed to send chip number to FI!\n"); exit(EXIT_FAILURE); }
-
-// Do ZeroTrust authentication and key generation between Alice and the FI.
-   if ( AliceDoZeroTrust(max_string_len, SHP_ptr, Client_CIArr, num_CIArr, TTP_index, port_number, TTP_socket_desc, My_index) == 0 )
-      return 0;
-
-
-char num_eCt_str[max_string_len];
-
-if ( SockGetB((unsigned char *)num_eCt_str, max_string_len, TTP_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Failed to send account details from FI to client\n"); }
-else { 
-   printf("SUCCESS: ClientAccount(): Client received account details from FI\n");
-   int amount;
-   sscanf(num_eCt_str, "%d", &amount);
-   int cents = amount % 100;
-   int dollars = amount / 100;
-   // printf("Client Account Balance: $%d.%02d\n", dollars, cents);  //moving this statement
-
-}
-   //////////////////////////////////// Natasha ////////////////////////////////////////////
-   // Client's local balance aka the eCTs the client has
-   
-   int num_ect_local = 0;
-   int amount;
-   int dummy;
-
-   PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 1, &dummy, 1, NULL, NULL, &num_ect_local);
-   
-   // printf("Available Balance after Withdrawing:\n");
-   int n_cents = num_ect_local % 100;
-   int n_dollars = num_ect_local / 100;
-   printf("Client's Withdrawal Amount: $%d.%02d\n", n_dollars, n_cents);
-   
-   ///////////////////////////////// NATASHA /////////////////////////////////////////////
-   sscanf(num_eCt_str, "%d", &amount);
-   int a_cents = amount % 100;
-   int a_dollars = amount / 100;
-   printf("Client Account Balance: $%d.%02d\n", a_dollars, a_cents); 
    close(TTP_socket_desc);
 
 printf("\nClientAccount(): DONE\n\n"); fflush(stdout);
@@ -443,6 +347,7 @@ printf("\nClientAccount(): DONE\n\n"); fflush(stdout);
    }
 ///////////////////////////////////////////////////////////////////////
 // ====================================== Client Account Done =============================================
+
 
 
 

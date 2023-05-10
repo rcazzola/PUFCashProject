@@ -573,7 +573,7 @@ if ( SockSendB((unsigned char *)eheCt_buffer, eCt_tot_bytes, Alice_socket_desc) 
 
 
 
-/*
+
 // ========================================= CLIENT ACCOUNT BEGIN =========================================
 // ========================================================================================================
 // This is the function for Client Account. Alice authenticates and generates a SK with TTP using zero trust. 
@@ -671,129 +671,13 @@ if ( SockSendB((unsigned char *)balance_encrypted, max_string_len, Alice_socket_
       { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); } 
 //////////////////////////////////////////////////////////////////////////////
 */
-/*
 printf("ClientAccount(): DONE!\n"); fflush(stdout);
 
    return;
    }
-*/
 // ===========================================CLIENT ACCOUNT DONE =========================================
 
 
-
-
-///////////////////////Client Account///////////////////////////////
-// ========================================================================================================
-// ========================================================================================================
-// This is the function for Client Account. Alice authenticates and generates a SK with TTP using zero trust. 
-// Alice sends the amount she withdrew and the FI maintains her bank account and checks her balance. FI then 
-// forwards the request to the bank.
-
-/////////////////////Aisha, Rachel/////////////////////////////
-void ClientAccount(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int Alice_socket_desc,
-   pthread_mutex_t *PUFCash_Account_DB_mutex_ptr, pthread_mutex_t *ZeroTrust_AuthenToken_DB_mutex_ptr, 
-   unsigned char *SK_TF, int min_withdraw_increment, int Bank_socket_desc, int port_number, int num_CIArr, 
-   ClientInfoStruct *Client_CIArr, int My_TTP_index)
-   {
-   char request_str[max_string_len];
-
-printf("ClientAccount(): BEGIN!\n"); fflush(stdout);
-
-// ===============================
-// ZeroTrust performed with Client and FI. First get Client chip_num to get AT.
-int chip_num;
-
-printf("ClientAccount(): Getting 'chip_num' from client to get their AT from the Bank!\n"); fflush(stdout); 
-
-   if ( SockGetB((unsigned char *)request_str, max_string_len, Alice_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Error getting 'chip_num' from client!\n"); exit(EXIT_FAILURE); }
-   sscanf(request_str, "%d", &chip_num);
-
-
-printf("ClientAccount(): FI getting AT for client's 'chip_num': %d!\n", chip_num); fflush(stdout); 
-
-// Get AT for client.
-int is_TTP = 1;
-int local_AT_status, remote_AT_status, Alice_chip_num, I_am_Alice; 
-
-ZeroTrust_GetATs(MAX_STRING_LEN, SHP_ptr, Bank_socket_desc, is_TTP, SK_TF, ZeroTrust_AuthenToken_DB_mutex_ptr, chip_num);
-  
-printf("ClientAccount(): FI performing ZeroTrust protocol with client!\n"); fflush(stdout); 
-   
-   I_am_Alice = 0;
-   Alice_chip_num = ExchangeIDsConfirmATExists(max_string_len, SHP_ptr, SHP_ptr->chip_num, port_number, I_am_Alice, Alice_socket_desc, 
-      &local_AT_status, &remote_AT_status);
-
-// Sanity check
-   if ( chip_num != Alice_chip_num )
-      { 
-      printf("ERROR: ClientAccount(): Client's 'chip_num' to get AT: %d is different from 'chip_num' returned from ExchangeIDsConfirmATExists: %d\n",
-         chip_num, Alice_chip_num); exit(EXIT_FAILURE);
-      }
-
-// Print error messase if client's don't have ATs for one another
-   if ( remote_AT_status == -1 || local_AT_status == -1 )
-      {
-      printf("ERROR: ClientAccount(): Client does NOT have an AT for the FI: remote_AT_status is 0 => %d!\n", remote_AT_status); fflush(stdout);
-      return; 
-      }
-
-printf("ClientAccount(): Exchange of ID's has been performed successfully with client's chip_num: %d!\n", Alice_chip_num); fflush(stdout);
-
-/*// Sanity check
-   if ( num_CIArr != 1 || My_TTP_index != 0 )
-      { printf("ERROR: ClientAccount(): The number of CIArr is NOT 1 (%d) OR My_TTP_index is not 0 (%d)!\n", num_CIArr, My_TTP_index); exit(EXIT_FAILURE); }
-*/
-
-// Generate a shared key. The shared key is stored in the Client_CIArr for next transaction.
-   I_am_Alice = 0;
-   if ( ZeroTrustGenSharedKey(max_string_len, SHP_ptr, Alice_chip_num, Alice_socket_desc, I_am_Alice, num_CIArr, Client_CIArr, My_TTP_index) == 1 )
-      { printf("ClientAccount(): FI SUCCEEDED in generating a shared key and authenticating the client!\n"); fflush(stdout); }
-   else
-      { 
-      printf("ClientAccount(): FI FAILED in generating a shared key and authenticating the client!\n"); fflush(stdout); 
-      return;
-      }
-
-// Get client and FI shared key using ZeroTrust.
-   int TID = 0;
-   int num_eCt = 0;
-   char num_eCt_str[max_string_len];
-   
-   unsigned char *SK_FA = Client_CIArr[My_TTP_index].AliceBob_shared_key;
-   Client_CIArr[My_TTP_index].AliceBob_shared_key = NULL;
-
-/*// Sanity check.
-   if ( SK_FA == NULL )
-      { printf("ERROR: ClientAccount(): SK_FA from ZeroTrust authen/key gen is NULL!\n"); exit(EXIT_FAILURE); }
-*/
-
-// Only allow one record to exist for each customer.
-      if ( PUFCashGetAcctRec(max_string_len, SHP_ptr->DB_PUFCash_V3, Alice_chip_num, &TID, 
-         &num_eCt, 0, 0) == 0 ) {
-
-         return;
-      }
-
-printf("Account Data Retrieved with TID: %d, Amount: %d\n", TID, num_eCt); fflush(stdout);
-sprintf(num_eCt_str, "%d", num_eCt);
-
-if ( SockSendB((unsigned char *)num_eCt_str, strlen(num_eCt_str)+1, Alice_socket_desc) < 0 )
-      { printf("ERROR: ClientAccount(): Failed to send client account details from FI to Alice\n"); }
-else { 
-   printf("SUCCESS: ClientAccount(): Sent client account details from FI to Alice\n");
-   int amount;
-   sscanf(num_eCt_str, "%d", &amount);
-   int cents = amount % 100;
-   int dollars = amount / 100;
-   printf("Client's Account Balance: $%d.%02d\n", dollars, cents);
-}
-
-printf("ClientAccount(): DONE!\n"); fflush(stdout);
-
-   return;
-   }
-//////////////////////////////////////////////
 
 
 
