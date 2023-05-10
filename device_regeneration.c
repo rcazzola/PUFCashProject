@@ -667,7 +667,6 @@ printf("ProcessInComingRequest(): Found Alice's IP '%s' at index %d in Client_CI
 
 int AliceTransferDriver(int max_string_len, SRFHardwareParamsStruct *SHP_ptr, int My_index, int Bob_index, 
    ClientInfoStruct *Client_CIArr, int port_number, int num_CIArr, int amount)
-// int num_eCt_nonce_bytes, int num_eCt) 
    {
    int Bob_socket_desc = -1;
 
@@ -745,14 +744,18 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
 
       unsigned char *eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       unsigned char *heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
       PUFCashGet_WRec_Data(max_string_len, SHP_ptr->DB_PUFCash_V3, SHP_ptr->chip_num, 2, &dummy, 1, &eCt_buffer, &heCt_buffer, &num_eCt); 
       
-      unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
-      unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      //unsigned char *Bob_eCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
+      //unsigned char *Bob_heCt_buffer = Allocate1DUnsignedChar(eCt_tot_bytes);
       
-      unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
-      unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      //unsigned char *Alice_eCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
+      //unsigned char *Alice_heCt_buffer = Allocate1DUnsignedChar(Alice_eCt_tot_bytes);
 
       memcpy(Bob_eCt_buffer, eCt_buffer, eCt_tot_bytes);
       memcpy(Bob_heCt_buffer, heCt_buffer, eCt_tot_bytes);
@@ -822,27 +825,6 @@ printf("AliceTransferDriver(): BEGIN!\n"); fflush(stdout);
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    close(Bob_socket_desc);
-
-
-//   while ( OpenSocketClient(max_string_len, Client_CIArr[Bob_index].IP, port_number, &Bob_socket_desc) < 0 )
-//      { 
-//      printf("INFO: AliceTransferDriver(): Alice trying to connect to Bob to exchange IDs!\n"); fflush(stdout); 
-//      usleep(500000); 
-//      num_retries++;
-//      if ( num_retries > 500 )
-//         exit(EXIT_FAILURE);
-//      }
-
-// If Alice doesn't have enough eCash to support her request to pay Bob, return immediately and fail. Also, if Bob's IP doesn't
-// exist, fail. This routine sends a ALICE-PAY-BOB message to Bob AND ASSUMES Bob_socket connection is STILL OPEN from the call
-// to AliceDoZeroTrust (FullTrust) operation above.
-//   int status;
-//   status = AliceTransfer(max_string_len, SHP_ptr, Bob_index, num_eCt_nonce_bytes, num_eCt, Client_CIArr, My_index, 
-//      Bob_socket_desc);
-
-// Close Bob's socket descriptor.
-//   close(Bob_socket_desc);
-
 
 printf("AliceTransferDriver(): DONE!\n"); fflush(stdout);
 #ifdef DEBUG
